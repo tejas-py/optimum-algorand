@@ -255,7 +255,7 @@ class Optimum(Application):
             ),
             # Remove first 4 bytes (ABI return prefix)
             # and return the rest
-            Extract(InnerTxn.last_log(), Int(0), Int(9))
+            Suffix(InnerTxn.last_log(), Int(4))
         )
 
     @external
@@ -435,7 +435,7 @@ class Optimum(Application):
                 }
             ),
             InnerTxnBuilder.Submit()
-    )
+        )
 
     @external
     def exchange(self, opt_asset_index: abi.Uint64, arg_fee_address: abi.String):
@@ -704,4 +704,8 @@ if __name__ == "__main__":
         App ID: {app_id}
         App Address: {app_addr}
     """)
+
+    txid = app_client.call(Optimum.VRF, foreign_apps=[])
+    print(txid.tx_id)
+    print(txid.return_value)
     # fund the smart contract
