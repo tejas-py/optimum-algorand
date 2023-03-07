@@ -614,7 +614,6 @@ def approval_program(ARG_OPT_ASSET_INDEX, ARG_FEE_ADDRESS):
         Return(Int(1))
     ])
 
-
     exchange = Seq([
         Assert(
             And(
@@ -634,7 +633,6 @@ def approval_program(ARG_OPT_ASSET_INDEX, ARG_FEE_ADDRESS):
         .Else(Err()),
         Return(Int(1))
     ])
-
 
     # Disperse Lottery amount to the winner address (called every week by the admin)
     # Must be called by admin.

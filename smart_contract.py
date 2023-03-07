@@ -11,7 +11,7 @@ class Optimum(Application):
     # Application States
     #####################
     ADMIN: Final[ApplicationStateValue] = ApplicationStateValue(
-        stack_type=TealType.bytes, default=Txn.accounts[1], static=True,
+        stack_type=TealType.bytes, default=Txn.sender(), static=True,
         descr="Admin Address for the Optimum Application."
     )
     GLOBAL_PAUSED: Final[ApplicationStateValue] = ApplicationStateValue(
@@ -85,7 +85,6 @@ class Optimum(Application):
     def create(self):
         return Seq(
             self.initialize_application_state(),
-            self.initialize_account_state()
         )
 
     @update
@@ -104,7 +103,9 @@ class Optimum(Application):
 
     @opt_in
     def opt_in(self):
-        return Approve()
+        return Seq(
+            self.initialize_account_state()
+        )
 
     @internal
     def basic_checks(self, tx_idx):
@@ -131,7 +132,7 @@ class Optimum(Application):
     def handle_deposit(self, opt_asa_id: abi.Uint64):
         optBalOfAppAcc = AssetHolding.balance(
             Global.current_application_address(),
-            opt_asa_id.get()
+            opt_asa_id
         )
         scratch_amount = ScratchVar(TealType.uint64)
         def saveAmount(amount): return scratch_amount.store(amount)
@@ -178,15 +179,84 @@ class Optimum(Application):
         )
 
     @internal
-    def handle_withdraw(self, opt_asa_id: abi.Uint64):
+    def handle_withdraw(self, opt_asa_id: abi.Uint64, fee_addr: abi.String):
         optBalOfAppAcc = AssetHolding.balance(
             Global.current_application_address(),
-            opt_asa_id.get()
+            opt_asa_id
         )
         scratch_amount = ScratchVar(TealType.uint64)
         def saveAmount(amount): return scratch_amount.store(amount)
         def amount(): return scratch_amount.load()
-        return
+        return Seq(
+            optBalOfAppAcc,
+            Assert(
+                And(
+                    Gtxn[0].xfer_asset() == opt_asa_id,
+                    Gtxn[0].asset_amount() > Int(0)
+                )
+            ),
+            saveAmount(
+                # note we do "- Gtxn[0].asset_amount()" in denominator because app account has already accepted OPT
+                # in tx0, which we want to avoid in "current" exchange calculation
+                Div(
+                    Mul(
+                        Gtxn[0].asset_amount(),
+                        (Balance(Global.current_application_address()) + self.GLOBAL_CUSTODIAL_DEPOSIT.get()) - Int(int(10e5))
+                    ),
+                    (Int(int(10e15)) - (optBalOfAppAcc.value() - Gtxn[0].asset_amount()))
+                ),
+            ),
+
+            # first deposit .1% fee to the fee address
+            InnerTxnBuilder.Begin(),
+            InnerTxnBuilder.SetFields(
+                {
+                    TxnField.type_enum: TxnType.Payment,
+                    TxnField.receiver: fee_addr,
+                    TxnField.amount: amount() / Int(1000), # algoWithdrawAmount * .001 (0.1% fee)
+                    # fee is set externally
+                    TxnField.fee: Int(0)
+                }
+            ),
+            InnerTxnBuilder.Submit(),
+
+            # inner tx sending remaining ALGO to user (amount calculated above)
+            InnerTxnBuilder.Begin(),
+            InnerTxnBuilder.SetFields(
+                {
+                    TxnField.type_enum: TxnType.Payment,
+                    TxnField.receiver: Txn.sender(),
+                    TxnField.amount: amount() - (amount() / Int(1000)),
+                    # fee is set externally
+                    TxnField.fee: Int(0)
+                }
+            ),
+            InnerTxnBuilder.Submit(),
+
+            # update local opt amount (OPT is deducted from user)
+            If(self.LOCAL_OPT_AMOUNT[Txn.sender()].get() >= Gtxn[0].asset_amount())
+            .Then(
+                    self.LOCAL_OPT_AMOUNT[Txn.sender()].set(
+                        self.LOCAL_OPT_AMOUNT[Txn.sender()].get() - Gtxn[0].asset_amount()
+                    )
+            )
+        )
+
+    @internal
+    def get_randomness(self):
+        return Seq(
+            # Prep arguments
+            (round_number := abi.Uint64()).set(Global.round() - Int(10)),
+            (user_data := abi.make(abi.DynamicArray[abi.Byte])).set([]),
+            InnerTxnBuilder.ExecuteMethodCall(
+                app_id=Txn.applications[1],
+                method_signature="must_get(uint64,byte[])byte[]",
+                args=[round_number, user_data],
+            ),
+            # Remove first 4 bytes (ABI return prefix)
+            # and return the rest
+            Extract(InnerTxn.last_log(), Int(0), Int(9))
+        )
 
     @external
     def pause_app(self):
@@ -208,10 +278,11 @@ class Optimum(Application):
     @external
     def set_governance_timelines(self, arg_apt_asset_index: abi.Uint64, global_reward_distribution: abi.Uint64,
                                  global_registration_end: abi.Uint64, period_start: abi.Uint64, period_end: abi.Uint64):
+        app_balance = AssetHolding.balance(
+            Global.current_application_address(), arg_apt_asset_index.get()
+        )
         return Seq(
-            AssetHolding.balance(
-                Global.current_application_address(), arg_apt_asset_index.get()
-            ),
+            app_balance,
             self.assert_sender_admin(),
             Assert(global_registration_end.get() > global_reward_distribution.get(),
                    comment="GLOBAL_REGISTRATION_END must be greater than GLOBAL_REWARD_DISTRIBUTION"),
@@ -226,11 +297,12 @@ class Optimum(Application):
             If(self.GLOBAL_GOVERNANCE_NONCE.get() > Int(1))
             .Then(
                 Seq(
-                    self.GLOBAL_TOTAL_OPT_DISPERSED_AT_GOVERNANCE.set(Minus(
-                        Int(int(10e15)),
-                        AssetHolding.balance(
-                            Global.current_application_address(), arg_apt_asset_index.get()
-                        ))),
+                    self.GLOBAL_TOTAL_OPT_DISPERSED_AT_GOVERNANCE.set(
+                        Minus(
+                            Int(int(10e15)),
+                            app_balance.value()
+                        )
+                    ),
                     self.GLOBAL_APP_BALANCE_AT_GOVERNANCE.set(self.app_balance())
                 )
             )
@@ -332,21 +404,23 @@ class Optimum(Application):
                     # update {local, global} state
                     self.LOCAL_DEPOSITED[Txn.accounts[i.load()]].set(Int(0)),
                     # deposit -= 10000. NOTE: in global state we store amount in "micro algo's"
-                    self.GLOBAL_CUSTODIAL_DEPOSIT.set(self.GLOBAL_CUSTODIAL_DEPOSIT.get()) - Int(int(10e9))
+                    self.GLOBAL_CUSTODIAL_DEPOSIT.set(self.GLOBAL_CUSTODIAL_DEPOSIT.get() - Int(int(10e9)))
                 ])
             )
         )
 
     @external
     def opt_in_asa(self, opt_asset_index: abi.Uint64):
+        app_balance = AssetHolding.balance(
+            Global.current_application_address(), opt_asset_index.get())
         return Seq(
+            app_balance,
             Assert(
                 And(
                     Global.group_size() == Int(1),
                     self.basic_checks(tx_idx=Int(0)),
                     opt_asset_index.get() == Txn.assets[0],
-                    AssetHolding.balance(
-                        Global.current_application_address(), opt_asset_index.get()) == Int(0)
+                    app_balance.value() == Int(0)
                 )
             ),
             InnerTxnBuilder.Begin(),
@@ -376,10 +450,258 @@ class Optimum(Application):
                     )
             ),
             If(Gtxn[0].type_enum() == TxnType.Payment)
-            .Then(self.handle_deposit(opt_asset_index.get()))
+            .Then(self.handle_deposit(opt_asa_id=opt_asset_index.get()))
 
             .ElseIf(Gtxn[0].type_enum() == TxnType.AssetTransfer)
-            .Then(self.handle_withdraw(opt_asset_index.get(), arg_fee_address.get()))
+            .Then(self.handle_withdraw(opt_asa_id=opt_asset_index.get(), fee_addr=arg_fee_address.get()))
 
             .Else(Err())
         )
+
+    @external
+    def register_custodial_wallets(self):
+        i = ScratchVar(TealType.uint64)
+        return Seq(
+            Assert(
+                And(
+                    self.basic_checks(tx_idx=Txn.group_index()),
+                    Global.latest_timestamp() <= self.GLOBAL_REGISTRATION_END.get(),
+                    Txn.sender() == self.ADMIN.get()
+                )
+            ),
+            # Now, for each txn.account of current transaction EXCEPT the last one (as it is the
+            # governance address), register the wallet
+            For(i.store(Int(1)), i.load() < Txn.accounts.length(), i.store(i.load() + Int(1))).Do(
+                Seq([
+                    # for each account, verify that it's whitelisted already & NOT registered
+                    Assert(
+                        And(
+                            self.LOCAL_WHITELISTED[Txn.accounts[i.load()]].get() == Int(1),
+                            # registered nonce should be less than "current" governance nonce, otherwise we have already registered
+                            self.LOCAL_REGISTERED[Txn.accounts[i.load()]].get() < self.GLOBAL_GOVERNANCE_NONCE.get()
+                        )
+                    ),
+
+                    # register for governance: send 0 ALGO to governance wallet with a memo
+                    InnerTxnBuilder.Begin(),
+                    InnerTxnBuilder.SetFields(
+                        {
+                            TxnField.type_enum: TxnType.Payment,
+                            TxnField.sender: Txn.accounts[i.load()],
+                            TxnField.receiver: Txn.application_args[1], # governance wallet to register
+                            TxnField.amount: Int(0),
+                            # note/memo field for registration. eg: af/gov1:j{"com":YYY}
+                            TxnField.note: Txn.application_args[2],
+                            # fee is set externally
+                            TxnField.fee: Int(0)
+                        }
+                    ),
+                    InnerTxnBuilder.Submit(),
+                    # update local state to "registered" for "current governance period"
+                    self.LOCAL_REGISTERED[Txn.accounts[i.load()]].set(self.GLOBAL_GOVERNANCE_NONCE.get()),
+                ])
+            )
+        )
+
+    @external
+    def vote_by_custodial_wallets(self):
+        i = ScratchVar(TealType.uint64)
+        return Seq(
+            Assert(
+                And(
+                    self.basic_checks(tx_idx=Txn.group_index()),
+                    Txn.sender() == self.ADMIN.get()
+                )
+            ),
+            # Now, for each txn.account of current transaction EXCEPT the last one (as it is the
+            # governance address), do voting by the wallet
+            For(i.store(Int(1)), i.load() < Txn.accounts.length(), i.store(i.load() + Int(1))).Do(
+                Seq([
+                    # for each account, verify that it's whitelisted already & registered AND
+                    # hasn't voted yet
+                    Assert(
+                        And(
+                            self.LOCAL_WHITELISTED[Txn.accounts[i.load()]].get() == Int(1),
+                            self.LOCAL_REGISTERED[Txn.accounts[i.load()]].get() == self.GLOBAL_GOVERNANCE_NONCE.get(),
+                            self.LOCAL_VOTED[Txn.accounts[i.load()]].get() < self.GLOBAL_GOVERNANCE_NONCE.get()
+                        )
+                    ),
+
+                    # voting for governance: send 0 ALGO to governance wallet with a memo
+                    InnerTxnBuilder.Begin(),
+                    InnerTxnBuilder.SetFields(
+                        {
+                            TxnField.type_enum: TxnType.Payment,
+                            TxnField.sender: Txn.accounts[i.load()],
+                            TxnField.receiver: Txn.application_args[1], # governance wallet to vote
+                            TxnField.amount: Int(0),
+                            # note/memo field for voting. eg: af/gov1:j[5,"a"]
+                            TxnField.note: Txn.application_args[2],
+                            # fee is set externally
+                            TxnField.fee: Int(0)
+                        }
+                    ),
+                    InnerTxnBuilder.Submit(),
+
+                    # update local state to "voted" for the current governance period
+                    self.LOCAL_VOTED[Txn.accounts[i.load()]].set(
+                        self.GLOBAL_GOVERNANCE_NONCE.get()
+                    )
+                ])
+            )
+        )
+
+    @external
+    def custodial_withdraw_rewards(self):
+        i = ScratchVar(TealType.uint64)
+        return Seq(
+            Assert(
+                And(
+                    self.basic_checks(tx_idx=Txn.group_index()),
+                    Txn.sender() == self.ADMIN.get()
+                )
+            ),
+            # Now, for each txn.account of current transaction, withraw rewards from it (after verification)
+            For(i.store(Int(1)), i.load() <= Txn.accounts.length(), i.store(i.load() + Int(1))).Do(
+                Seq([
+                    # for each account, verify that it's whitelisted 10000 ALGO is deposited
+                    Assert(
+                        And(
+                            self.LOCAL_WHITELISTED[Txn.accounts[i.load()]].get() == Int(1),
+                            self.LOCAL_REGISTERED[Txn.accounts[i.load()]].get() == self.GLOBAL_GOVERNANCE_NONCE.get(),
+                            self.LOCAL_VOTED[Txn.accounts[i.load()]].get() == self.GLOBAL_GOVERNANCE_NONCE.get(),
+
+                            # Ensure that after withdrawing the reward amount from the custodial wallet
+                            # 10000 ALGO + account_min_balance remains (which the user can withdraw later).
+                            (Balance(Txn.accounts[i.load()]) - Btoi(Txn.application_args[i.load()])) >= Int(int(10e9))
+                        )
+                    ),
+
+                    # withdraw rewards in ALGO each from Txn.account
+                    InnerTxnBuilder.Begin(),
+                    InnerTxnBuilder.SetFields(
+                        {
+                            TxnField.type_enum: TxnType.Payment,
+                            TxnField.sender: Txn.accounts[i.load()],
+                            TxnField.receiver: Global.current_application_address(),
+                            TxnField.amount: Btoi(Txn.application_args[i.load()]), # arg[0] is "custodial_withdraw_rewards"
+                            # fee is set externally
+                            TxnField.fee: Int(0)
+                        }
+                    ),
+                    InnerTxnBuilder.Submit(),
+                ])
+            )
+        )
+
+    @external
+    def custodial_close_wallets(self):
+        i = ScratchVar(TealType.uint64)
+        return Seq(
+            Assert(
+                self.basic_checks(tx_idx=Txn.group_index()),
+                Txn.sender() == self.ADMIN.get()
+            ),
+            # Now, for each txn.account of current transaction, withraw rewards from it (after verification)
+            For(i.store(Int(1)), i.load() <= Txn.accounts.length(), i.store(i.load() + Int(1))).Do(
+                Seq([
+                    # for each account, verify that it's whitelisted
+                    Assert(self.LOCAL_WHITELISTED[Txn.accounts[i.load()]].get() == Int(1)),
+                    # set up a tx with "rekey to" set as the admin (sender)
+                    InnerTxnBuilder.Begin(),
+                    InnerTxnBuilder.SetFields(
+                        {
+                            TxnField.type_enum: TxnType.Payment,
+                            TxnField.sender: Txn.accounts[i.load()],
+                            TxnField.receiver: Global.current_application_address(),
+                            TxnField.amount: Int(0),
+                            # give control back to that account (bdw, do we really need this?)
+                            TxnField.rekey_to: Txn.sender(),
+                            # fee is set externally
+                            TxnField.fee: Int(0)
+                        }
+                    ),
+                    InnerTxnBuilder.Submit(),
+                ])
+            )
+        )
+
+    @external
+    def disperse_lottery(self, opt_asset_index: abi.Uint64, fee_addr: abi.String, reward_amount: abi.Uint64):
+        return Seq(
+            Assert(
+                self.basic_checks(tx_idx=Txn.group_index()),
+                Txn.sender() == self.ADMIN.get(),
+
+                # ensure atleast 23h b/w consecutive lottery dispersals
+                Global.latest_timestamp() - self.GLOBAL_LAST_LOTTERY_DISPERSAL_TS.get() >= Int(82800)
+            ),
+
+            # deposit reward amount to the winner address (90%)
+            InnerTxnBuilder.Begin(),
+            InnerTxnBuilder.SetFields(
+                {
+                    TxnField.type_enum: TxnType.AssetTransfer,
+                    TxnField.xfer_asset: opt_asset_index.get(),
+                    TxnField.asset_receiver: Txn.accounts[1],
+                    TxnField.asset_amount: Btoi(Txn.application_args[1]),
+                    # fee is set externally
+                    TxnField.fee: Int(0)
+                }
+            ),
+            InnerTxnBuilder.Submit(),
+
+            # deposit reward amount to the fee wallet (10% fee)
+            InnerTxnBuilder.Begin(),
+            InnerTxnBuilder.SetFields(
+                {
+                    TxnField.type_enum: TxnType.AssetTransfer,
+                    TxnField.xfer_asset: opt_asset_index.get(),
+                    TxnField.asset_receiver: fee_addr.get(),
+                    TxnField.asset_amount: Btoi(Txn.application_args[2]),
+                    # fee is set externally
+                    TxnField.fee: Int(0)
+                }
+            ),
+            InnerTxnBuilder.Submit(),
+
+            # track last time lottery was dispersed (to ensure gap b/w consecutive lottery is atleast 23h)
+            self.GLOBAL_LAST_LOTTERY_DISPERSAL_TS.set(Global.latest_timestamp()),
+
+            # update local state to track the winner and the lottery amt (to show in table in UI)
+            self.LOCAL_OPT_REWARD_AMOUNT[Txn.accounts[1]].set(
+                self.LOCAL_OPT_REWARD_AMOUNT.get() + reward_amount.get()
+            ),
+
+            # update local opt amount key deposited to user (i.e track deposits + lottery winnings for a user)
+            self.LOCAL_OPT_AMOUNT[Txn.accounts[1]].set(
+                self.LOCAL_OPT_AMOUNT[Txn.accounts[1]].get() + reward_amount.get()
+            )
+        )
+
+    @external
+    def VRF(self, *, output: abi.Uint64):
+        (randomness_number := abi.DynamicBytes()).decode(self.get_randomness())
+        return output.set(Mod(Btoi(randomness_number.get()), Int(9999999)))
+
+
+if __name__ == "__main__":
+
+    # Get sandbox algod client
+    sandbox_client = sandbox.get_algod_client()
+
+    # get the account from sandbox
+    account = sandbox.get_accounts().pop()
+    act2 = sandbox.get_accounts()[0]
+
+    # Create an Application client
+    app_client = client.ApplicationClient(client=sandbox_client, app=Optimum(version=8), signer=account.signer)
+
+    # Create Commitment
+    app_id, app_addr, txid = app_client.create()
+    print(
+        f"""Deployed app in txid {txid}
+        App ID: {app_id}
+        App Address: {app_addr}
+    """)
+    # fund the smart contract
