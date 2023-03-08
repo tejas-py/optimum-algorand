@@ -1,0 +1,168 @@
+{
+    "name": "Optimum",
+    "methods": [
+        {
+            "name": "pause_app",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "unpause_app",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "set_governance_timelines",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "arg_apt_asset_index"
+                },
+                {
+                    "type": "uint64",
+                    "name": "global_reward_distribution"
+                },
+                {
+                    "type": "uint64",
+                    "name": "global_registration_end"
+                },
+                {
+                    "type": "uint64",
+                    "name": "period_start"
+                },
+                {
+                    "type": "uint64",
+                    "name": "period_end"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "set_governance_reward_rate",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "reward_rate_number"
+                },
+                {
+                    "type": "uint64",
+                    "name": "reward_rate_decimal"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "whitelist_account",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "custodial_deposit",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "custodial_withdraw",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "opt_in_asa",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "opt_asset_index"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "exchange",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "opt_asset_index"
+                },
+                {
+                    "type": "string",
+                    "name": "arg_fee_address"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "register_custodial_wallets",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "vote_by_custodial_wallets",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "custodial_withdraw_rewards",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "custodial_close_wallets",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "disperse_lottery",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "opt_asset_index"
+                },
+                {
+                    "type": "string",
+                    "name": "fee_addr"
+                },
+                {
+                    "type": "uint64",
+                    "name": "reward_amount"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "VRF",
+            "args": [],
+            "returns": {
+                "type": "uint64"
+            }
+        }
+    ],
+    "networks": {}
+}
