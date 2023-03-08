@@ -1,5 +1,5 @@
 from algosdk.atomic_transaction_composer import *
-from algosdk import account, mnemonic
+from algosdk import account, mnemonic, logic
 import connection
 import application
 from beaker import client
@@ -31,6 +31,13 @@ def app(app_id: int = 0):
         print("Funded app")
         app_client.opt_in()
         print("Opted in")
+    else:
+        app_addr = logic.get_application_address(app_id)
+
+    print(f"Current app state:{app_client.get_application_state()}")
+
+    print(f"Current Account State:{app_client.get_account_state()}")
+
 
     # # Create an Application client
     # app_client = client.ApplicationClient(client=sandbox_client, app=Optimum(version=8), signer=account.signer)
