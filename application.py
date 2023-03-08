@@ -1,5 +1,3 @@
-from algosdk.atomic_transaction_composer import AtomicTransactionComposer, TransactionWithSigner
-from algosdk import transaction
 from pyteal import *
 from beaker import *
 from typing import Final
@@ -684,28 +682,13 @@ class Optimum(Application):
         (randomness_number := abi.DynamicBytes()).decode(self.get_randomness())
         return output.set(Mod(Btoi(randomness_number.get()), Int(9999999)))
 
+    @clear_state()
+    def clear_state(self):
+        return Approve()
+
 
 if __name__ == "__main__":
 
-    # Get sandbox algod client
-    sandbox_client = sandbox.get_algod_client()
+    Optimum().dump("./artifacts")
 
-    # get the account from sandbox
-    account = sandbox.get_accounts().pop()
-    act2 = sandbox.get_accounts()[0]
 
-    # Create an Application client
-    app_client = client.ApplicationClient(client=sandbox_client, app=Optimum(version=8), signer=account.signer)
-
-    # Create Commitment
-    app_id, app_addr, txid = app_client.create()
-    print(
-        f"""Deployed app in txid {txid}
-        App ID: {app_id}
-        App Address: {app_addr}
-    """)
-
-    txid = app_client.call(Optimum.VRF, foreign_apps=[])
-    print(txid.tx_id)
-    print(txid.return_value)
-    # fund the smart contract
