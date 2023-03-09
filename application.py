@@ -273,10 +273,10 @@ class Optimum(Application):
         )
 
     @external
-    def set_governance_timelines(self, arg_apt_asset_index: abi.Uint64, global_reward_distribution: abi.Uint64,
+    def set_governance_timelines(self, global_reward_distribution: abi.Uint64,
                                  global_registration_end: abi.Uint64, period_start: abi.Uint64, period_end: abi.Uint64):
         app_balance = AssetHolding.balance(
-            Global.current_application_address(), arg_apt_asset_index.get()
+            Global.current_application_address(), Txn.assets[0]
         )
         return Seq(
             app_balance,
@@ -407,16 +407,15 @@ class Optimum(Application):
         )
 
     @external
-    def opt_in_asa(self, opt_asset_index: abi.Uint64):
+    def opt_in_asa(self):
         app_balance = AssetHolding.balance(
-            Global.current_application_address(), opt_asset_index.get())
+            Global.current_application_address(), Txn.assets[0])
         return Seq(
             app_balance,
             Assert(
                 And(
                     Global.group_size() == Int(1),
                     self.basic_checks(tx_idx=Int(0)),
-                    opt_asset_index.get() == Txn.assets[0],
                     app_balance.value() == Int(0)
                 )
             ),
@@ -424,7 +423,7 @@ class Optimum(Application):
             InnerTxnBuilder.SetFields(
                 {
                     TxnField.type_enum: TxnType.AssetTransfer,
-                    TxnField.xfer_asset: opt_asset_index.get(),
+                    TxnField.xfer_asset: Txn.assets[0],
                     TxnField.asset_receiver: Global.current_application_address(),
                     TxnField.asset_amount: Int(0),
                     # fee is set externally
