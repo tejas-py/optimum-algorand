@@ -251,9 +251,8 @@ class Optimum(Application):
                 method_signature="must_get(uint64,byte[])byte[]",
                 args=[round_number, user_data],
             ),
-            # Remove first 4 bytes (ABI return prefix)
-            # and return the rest
-            Suffix(InnerTxn.last_log(), Int(4))
+            # Extract the first 9 digits
+            Extract(InnerTxn.last_log(), Int(0), Int(9))
         )
 
     @external
@@ -679,8 +678,10 @@ class Optimum(Application):
 
     @external
     def VRF(self, *, output: abi.Uint64):
-        (randomness_number := abi.DynamicBytes()).decode(self.get_randomness())
-        return output.set(Mod(Btoi(randomness_number.get()), Int(9999999)))
+        return Seq(
+            (randomness_number := abi.DynamicBytes()).decode(self.get_randomness()),
+            output.set(Mod(Btoi(randomness_number.get()), Int(9999999)))
+        )
 
     @clear_state()
     def clear_state(self):

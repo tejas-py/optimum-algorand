@@ -27,7 +27,7 @@ def app(app_id: int = 0):
     if app_id == 0:
         app_id, app_addr, Txid = app_client.create()
         print(f"Created app at \n Application-id: {app_id},\n Application-address:{app_addr}\n and Transaction-id:{Txid}")
-        app_client.fund(5 * int(1e6))
+        app_client.fund(1 * int(1e6))
         print("Funded app")
         app_client.opt_in()
         print("Opted in")
