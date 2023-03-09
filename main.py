@@ -39,22 +39,5 @@ def app(app_id: int = 0):
     print(f"Current Account State:{app_client.get_account_state()}")
 
 
-    # # Create an Application client
-    # app_client = client.ApplicationClient(client=sandbox_client, app=Optimum(version=8), signer=account.signer)
-    #
-    # # Create Commitment
-    # app_id, app_addr, txid = app_client.create()
-    # print(
-    #     f"""Deployed app in txid {txid}
-    #     App ID: {app_id}
-    #     App Address: {app_addr}
-    # """)
-    #
-    # txid = app_client.call(Optimum.VRF, foreign_apps=[110096026])
-    # print(txid.tx_id)
-    # print(txid.return_value)
-    # fund the smart contract
-
-
 if __name__ == "__main__":
     app(app_id=APP_ID)
