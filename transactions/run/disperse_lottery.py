@@ -1,3 +1,4 @@
+import base64
 from algosdk.atomic_transaction_composer import AtomicTransactionComposer, AccountTransactionSigner
 from algosdk import encoding
 from connection import algo_conn, connect_indexer
@@ -68,7 +69,7 @@ def local_opt_balance(app_id):
     return local_opt_balances
 
 
-#
+# get the winner and reward amount
 def get_winner_and_reward_amt(app_id, admin_wallet, vrf_random_number):
 
     # Create  an app client for our app
@@ -93,11 +94,45 @@ def get_winner_and_reward_amt(app_id, admin_wallet, vrf_random_number):
 
     # Get the total OPT ASA Amount in the Smart Contract local State
     total_opt = 0.0
-    for v in app_local_opt_balance.values():
+    for v in list(app_local_opt_balance.values()):
         total_opt += v
 
     # Find the Probability of every value
     probabilities = []
-    for v in app_local_opt_balance.values():
+    for v in list(app_local_opt_balance.values()):
         probabilities.append(round(float(v) / total_opt, 3))
 
+    # get the probability for every address
+    cnt = len(app_local_opt_balance)
+    results = []
+    for i in range(1, cnt+1):
+        results.append(i)
+
+    # Get the winner of the Lottery
+    s = 0
+    last_index = len(probabilities) - 1
+
+    random_number = results[last_index]
+
+    for i in range(last_index):
+        s += probabilities[i]
+        if vrf_random_number < s:
+            random_number = results[i]
+            break
+
+    weeks = 13
+
+    # this would be the reward we would get after each governance period
+    reward = total_opt * apy
+
+    reward_per_week = round(float(reward/weeks), 5)
+    addresses = list(app_local_opt_balance.keys())
+    return [addresses[random_number-1], reward_per_week]
+
+
+if __name__ == "__main__":
+    res = indexer_client.search_transactions(txid="M7I3UZNRECBHQPI7I5YR5EI6RK7K24GGEPTPH6V65HC2CHTQD7QQ")
+    return_value = res['transactions'][0]['logs'][0]
+    decoded_value = base64.b64decode(return_value)
+    print(decoded_value[4:])
+    print(int.from_bytes(decoded_value, 'big'))
