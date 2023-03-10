@@ -273,8 +273,8 @@ class Optimum(Application):
         )
 
     @external
-    def set_governance_timelines(self, global_reward_distribution: abi.Uint64,
-                                 global_registration_end: abi.Uint64, period_start: abi.Uint64, period_end: abi.Uint64):
+    def set_governance_timelines(self, global_reward_distribution: abi.Uint64, global_registration_end: abi.Uint64,
+                                 period_start: abi.Uint64, period_end: abi.Uint64):
         app_balance = AssetHolding.balance(
             Global.current_application_address(), Txn.assets[0]
         )
@@ -296,7 +296,7 @@ class Optimum(Application):
                 Seq(
                     self.GLOBAL_TOTAL_OPT_DISPERSED_AT_GOVERNANCE.set(
                         Minus(
-                            Int(int(10e15)),
+                            Int(int(10e15)),  # 10 Billion
                             app_balance.value()
                         )
                     ),

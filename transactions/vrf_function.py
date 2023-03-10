@@ -1,3 +1,5 @@
+# NOTE: Incomplete, add after all the smart contract functions has been called
+
 from algosdk.atomic_transaction_composer import AtomicTransactionComposer, AccountTransactionSigner
 from algosdk import transaction, encoding
 from connection import algo_conn
@@ -38,35 +40,6 @@ def app_optin(app_id, wallet_address):
     result = [{'txn': encoding.msgpack_encode(txn_details.txn)}]
 
     return result
-
-
-def call_vrf(app_id, wallet_address):
-
-    # Create  an app client for our app
-    app_client = client.ApplicationClient(
-        client=algod_client, app=Optimum(), app_id=app_id, signer=ACCOUNT_SIGNER
-    )
-
-    params = algod_client.suggested_params()
-    params.fee = 2000
-    params.flat_fee = True
-
-    # build the transaction
-    atc = AtomicTransactionComposer()
-    app_client.add_method_call(
-        atc=atc,
-        method=Optimum.VRF,
-        sender=wallet_address,
-        suggested_params=params,
-        foreign_apps=[110096026]
-    )
-
-    # extract the transaction from the ATC
-    txn_details = atc.txn_list[0]
-    result = [{'txn': encoding.msgpack_encode(txn_details.txn)}]
-
-    return result
-
 
 if __name__ == "__main__":
 

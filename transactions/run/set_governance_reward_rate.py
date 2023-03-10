@@ -1,4 +1,3 @@
-import time
 from algosdk.atomic_transaction_composer import AtomicTransactionComposer, AccountTransactionSigner
 from algosdk import encoding
 from connection import algo_conn
@@ -11,35 +10,28 @@ algod_client = algo_conn("testnet")
 ACCOUNT_SIGNER = AccountTransactionSigner("a" * 32)
 
 
-def main(app_id, admin_wallet_address, asset_id):
+def main(admin_wallet, app_id):
+
     # Create  an app client for our app
     app_client = client.ApplicationClient(
         client=algod_client, app=Optimum(), app_id=app_id, signer=ACCOUNT_SIGNER
     )
 
-    # set the arguments
-    now = round(time.time())
-    # timelines for an algorand governance (test values)
-    period_start = now + (1 * 60)
-    reward_distribution = now + (2 * 60)
-    registration_end = now + (3 * 60)
-    period_end = now + (18 * 24 * 60 * 60)  # start + 18 days (~2 weeks)
-
     # set the params
     params = algod_client.suggested_params()
+
+    reward_rate_number = 2
+    reward_rate_decimals = 10  # i.e apy = 2/10 = 0.2%
 
     # build the transaction
     atc = AtomicTransactionComposer()
     app_client.add_method_call(
         atc=atc,
-        method=Optimum.set_governance_timelines,
-        sender=admin_wallet_address,
+        method=Optimum.set_governance_reward_rate,
+        sender=admin_wallet,
         suggested_params=params,
-        foreign_assets=[asset_id],
-        global_reward_distribution=reward_distribution,
-        global_registration_end=registration_end,
-        period_start=period_start,
-        period_end=period_end
+        reward_rate_number=reward_rate_number,
+        reward_rate_decimals=reward_rate_decimals
     )
 
     # extract the transaction from the ATC
@@ -47,4 +39,3 @@ def main(app_id, admin_wallet_address, asset_id):
     result = [{'txn': encoding.msgpack_encode(txn_details.txn)}]
 
     return result
-
