@@ -64,3 +64,4 @@ def deposit(sender_wallet, app_id, asset_id, algo_amt):
 # Returns if enough wallets are not available.
 # NOTE: deposit amount is in microAlgos
 def fund_custodian_wallets(sender_wallet, asset_id, amt):
+    ""
