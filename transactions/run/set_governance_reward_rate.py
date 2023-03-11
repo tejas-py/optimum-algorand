@@ -1,5 +1,4 @@
-from algosdk.atomic_transaction_composer import AtomicTransactionComposer, AccountTransactionSigner
-from algosdk import encoding
+from algosdk import encoding, atomic_transaction_composer
 from connection import algo_conn
 from application import Optimum
 from beaker import client
@@ -7,7 +6,7 @@ from beaker import client
 # Connect to Algod-Client in Testnet Network
 algod_client = algo_conn("testnet")
 # Create a Dummy Signer to fetch the transaction object
-ACCOUNT_SIGNER = AccountTransactionSigner("a" * 32)
+ACCOUNT_SIGNER = atomic_transaction_composer.AccountTransactionSigner("a" * 32)
 
 
 def main(admin_wallet, app_id):
@@ -24,7 +23,7 @@ def main(admin_wallet, app_id):
     reward_rate_decimals = 10  # i.e apy = 2/10 = 0.2%
 
     # build the transaction
-    atc = AtomicTransactionComposer()
+    atc = atomic_transaction_composer.AtomicTransactionComposer()
     app_client.add_method_call(
         atc=atc,
         method=Optimum.set_governance_reward_rate,

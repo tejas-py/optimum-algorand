@@ -1,6 +1,5 @@
 import base64
-from algosdk.atomic_transaction_composer import AtomicTransactionComposer, AccountTransactionSigner
-from algosdk import encoding
+from algosdk import encoding, atomic_transaction_composer
 from connection import algo_conn, connect_indexer
 from application import Optimum
 from beaker import client
@@ -9,7 +8,7 @@ from beaker import client
 algod_client = algo_conn("testnet")
 indexer_client = connect_indexer("testnet")
 # Create a Dummy Signer to fetch the transaction object
-ACCOUNT_SIGNER = AccountTransactionSigner("a" * 32)
+ACCOUNT_SIGNER = atomic_transaction_composer.AccountTransactionSigner("a" * 32)
 
 
 # Get the Random value by calling the VRF Function in the Smart Contract
@@ -25,7 +24,7 @@ def get_random_value(app_id, wallet_address):
     params.flat_fee = True
 
     # build the transaction
-    atc = AtomicTransactionComposer()
+    atc = atomic_transaction_composer.AtomicTransactionComposer()
     app_client.add_method_call(
         atc=atc,
         method=Optimum.VRF,
@@ -70,7 +69,7 @@ def local_opt_balance(app_id):
 
 
 # get the winner and reward amount
-def get_winner_and_reward_amt(app_id, admin_wallet, vrf_random_number):
+def get_winner_and_reward_amt(app_id, vrf_random_number):
 
     # Create  an app client for our app
     app_client = client.ApplicationClient(
