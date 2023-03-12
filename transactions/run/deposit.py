@@ -2,8 +2,9 @@ from algosdk import encoding, atomic_transaction_composer, transaction, logic
 from connection import algo_conn, connect_indexer
 from application import Optimum
 from beaker import client
+from utils  import common_functions
 
-# Connect to Algod-Client in Testnet Network
+# Connect to Algod-Client and Indexer-Client in Testnet Network
 algod_client = algo_conn("testnet")
 indexer_client = connect_indexer("testnet")
 # Create a Dummy Signer to fetch the transaction object
@@ -63,5 +64,20 @@ def deposit(sender_wallet, app_id, asset_id, algo_amt):
 # Find and fund custodial wallets with 10000 ALGO increments.
 # Returns if enough wallets are not available.
 # NOTE: deposit amount is in microAlgos
-def fund_custodian_wallets(sender_wallet, asset_id, amt):
-    ""
+def fund_custodian_wallets(sender_wallet, app_id, deposit_amt):
+
+    # extract custodial wallets from indexer, which we will fund
+    custodial_wallets_orig = common_functions.get_custodian_wallets(app_id, {'deposited': 0})
+
+    req_wallets = int(deposit_amt/10000e6)
+    if len(custodial_wallets_orig) < req_wallets:
+        return {'message': f"Not enough wallets to fund."
+                           f"Required ${req_wallets} but got ${custodial_wallets_orig.length}."
+                           f"Please generate more accounts"}
+
+    # we only get address we need
+    custodial_wallets = custodial_wallets_orig[0:req_wallets]
+
+    # split whole custodial wallets array into chunks of 4
+    # as max 4 accounts can be passed in a tx group.
+    txn_account_array = common_functions.chunky_array(custodial_wallets, 4)
