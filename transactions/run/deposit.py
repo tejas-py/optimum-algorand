@@ -81,3 +81,10 @@ def fund_custodian_wallets(sender_wallet, app_id, deposit_amt):
     # split whole custodial wallets array into chunks of 4
     # as max 4 accounts can be passed in a tx group.
     txn_account_array = common_functions.chunky_array(custodial_wallets, 4)
+
+    # create a for loop for transaction objects
+    txn_array = []
+    j = 0
+    for i in range(0, req_wallets, 4):
+
+        j += 1
