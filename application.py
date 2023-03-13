@@ -455,7 +455,7 @@ class Optimum(Application):
         )
 
     @external
-    def register_custodial_wallets(self):
+    def register_custodial_wallets(self, txn_note: abi.String):
         i = ScratchVar(TealType.uint64)
         return Seq(
             Assert(
@@ -484,10 +484,10 @@ class Optimum(Application):
                         {
                             TxnField.type_enum: TxnType.Payment,
                             TxnField.sender: Txn.accounts[i.load()],
-                            TxnField.receiver: Txn.application_args[1], # governance wallet to register
+                            TxnField.receiver: Txn.accounts[2],  # governance wallet to register
                             TxnField.amount: Int(0),
                             # note/memo field for registration. eg: af/gov1:j{"com":YYY}
-                            TxnField.note: Txn.application_args[2],
+                            TxnField.note: txn_note.get(),
                             # fee is set externally
                             TxnField.fee: Int(0)
                         }
@@ -500,7 +500,7 @@ class Optimum(Application):
         )
 
     @external
-    def vote_by_custodial_wallets(self):
+    def vote_by_custodial_wallets(self, txn_note: abi.String):
         i = ScratchVar(TealType.uint64)
         return Seq(
             Assert(
@@ -510,7 +510,7 @@ class Optimum(Application):
                 )
             ),
             # Now, for each txn.account of current transaction EXCEPT the last one (as it is the
-            # governance address), do voting by the wallet
+            # governance address), do vote by the wallet
             For(i.store(Int(1)), i.load() < Txn.accounts.length(), i.store(i.load() + Int(1))).Do(
                 Seq([
                     # for each account, verify that it's whitelisted already & registered AND
@@ -529,10 +529,10 @@ class Optimum(Application):
                         {
                             TxnField.type_enum: TxnType.Payment,
                             TxnField.sender: Txn.accounts[i.load()],
-                            TxnField.receiver: Txn.application_args[1], # governance wallet to vote
+                            TxnField.receiver: Txn.accounts[2], # governance wallet to vote
                             TxnField.amount: Int(0),
                             # note/memo field for voting. eg: af/gov1:j[5,"a"]
-                            TxnField.note: Txn.application_args[2],
+                            TxnField.note: txn_note.get(),
                             # fee is set externally
                             TxnField.fee: Int(0)
                         }
