@@ -1,4 +1,4 @@
-from algosdk import encoding, atomic_transaction_composer, transaction, logic
+from algosdk import encoding, atomic_transaction_composer, transaction
 from connection import algo_conn
 from application import Optimum
 from beaker import client

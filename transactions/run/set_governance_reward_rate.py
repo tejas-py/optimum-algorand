@@ -29,8 +29,7 @@ def main(admin_wallet, app_id):
         method=Optimum.set_governance_reward_rate,
         sender=admin_wallet,
         suggested_params=params,
-        reward_rate_number=reward_rate_number,
-        reward_rate_decimals=reward_rate_decimals
+        method_args=[reward_rate_number, reward_rate_decimals]
     )
 
     # extract the transaction from the ATC

@@ -24,7 +24,7 @@ def get_custodian_wallets(app_id, config):
     )
 
     custodian_wallets = []
-    for account in res:
+    for account in res.accounts:
         local_state = app_client.get_account_state(account=account)
         if local_state == {}:
             continue
