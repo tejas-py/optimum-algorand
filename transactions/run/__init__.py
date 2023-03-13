@@ -5,3 +5,4 @@ from transactions.run import register
 from transactions.run import set_governance_reward_rate
 from transactions.run import vote
 from transactions.run import withdraw_rewards
+from transactions.run import withdraw
