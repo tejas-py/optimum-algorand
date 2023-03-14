@@ -115,4 +115,57 @@ def withdraw_from_custodial_wallets(sender_wallet, app_id, withdraw_amt):
     # extract custodial wallets from indexer, from which we will withdraw 10000 ALGO's
     custodial_wallet_orig = utils.common_functions.get_custodian_wallets(app_id, {'deposited': 10000})
 
+    req_wallets = int(withdraw_amt/10000e6)
+
+    if len(custodial_wallet_orig) < req_wallets:
+        return f"Not enough wallets to withdraw from. Required ${req_wallets} but got ${len(custodial_wallet_orig)}." \
+               f"Please generate more accounts"
+
+    # get only the addresses we need
+    custodial_wallets = custodial_wallet_orig[0:req_wallets]
+
+    # split the whole custodial wallet in the chunk of 4
+    # as max 4 accounts can be passed in the txn group
+    txn_accounts_array = utils.common_functions.chunky_array(custodial_wallets, 4)
+
+    # let's make the transaction objects
+    txn_array = []
+    j = 0
+
+    for i in range(0, len(custodial_wallets), 4):
+        # make params for each transaction
+        params = algod_client.suggested_params()
+        params.fee = 1000 * (len(txn_accounts_array[j]) if txn_accounts_array[j] else 0)
+        # make the txn object
+        atc = atomic_transaction_composer.AtomicTransactionComposer()
+        app_client.add_method_call(
+            atc=atc,
+            method=Optimum.custodial_withdraw,
+            sender=sender_wallet,
+            accounts=[txn_accounts_array[j]]
+        )
+        # push the txn object into the transaction array
+        txn_array.append(atc.txn_list[0])
+        j += 1
+
+    # Assemble the transactions in group of 16, and pass return the transaction object
+    txn_groups = utils.common_functions.chunky_array(txn_array, 16)
+
+    # Assign group id to the group transactions
+    group_id_transactions = []
+    for txn_group in txn_groups:
+        txns = transaction.assign_group_id(txn_group)
+        group_id_transactions.append(txns)
+
+    # Encode the transactions to return it
+    encoded_txns = []
+    for single_group_txn in group_id_transactions:
+        txn_grp = []
+        for single_txn in single_group_txn:
+            encoded_txn = {'txn': encoding.msgpack_encode(single_txn)}
+            txn_grp.append(encoded_txn)
+        encoded_txns.append(txn_grp)
+
+    return encoded_txns
+
 

@@ -28,15 +28,14 @@ def vote_by_custodial_wallet(sender_wallet, app_id, governance_address, memo):
 
     # let's make the transaction objects
     txn_array = []
-    atc = atomic_transaction_composer.AtomicTransactionComposer()
     j = 0
 
     for i in range(0, len(custodial_wallets), 3):
         # make params for each transaction
         params = algod_client.suggested_params()
         params.fee = 1000 * (len(txn_account_array[j]) if txn_account_array[j] else 0)
-
         # make the txn object
+        atc = atomic_transaction_composer.AtomicTransactionComposer()
         app_client.add_method_call(
             atc=atc,
             method=Optimum.vote_by_custodial_wallets,
@@ -44,7 +43,8 @@ def vote_by_custodial_wallet(sender_wallet, app_id, governance_address, memo):
             accounts=[txn_account_array[j], governance_address],
             txn_note=memo
         )
-
+        # push the txn object into the transaction array
+        txn_array.append(atc.txn_list[0])
         j += 1
 
     # Assemble the transactions in group of 16, and pass return the transaction object

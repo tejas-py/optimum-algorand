@@ -88,7 +88,6 @@ def fund_custodian_wallets(sender_wallet, app_id, deposit_amt):
 
     # create a for loop for transaction objects
     txn_array = []
-    atc = atomic_transaction_composer.AtomicTransactionComposer()
     j = 0
 
     for i in range(0, req_wallets, 4):
@@ -97,13 +96,15 @@ def fund_custodian_wallets(sender_wallet, app_id, deposit_amt):
         params.fee = 1000 * (len(txn_account_array[j]) if txn_account_array[j] else 0)
 
         # make transaction object
+        atc = atomic_transaction_composer.AtomicTransactionComposer()
         app_client.add_method_call(
             atc=atc,
             method=Optimum.custodial_deposit,
             sender=sender_wallet,
             accounts=[txn_account_array[j]]
         )
-
+        # push the txn object into the transaction array
+        txn_array.append(atc.txn_list[0])
         j += 1
 
     # Assemble the transactions in group of 16, and pass return the transaction object

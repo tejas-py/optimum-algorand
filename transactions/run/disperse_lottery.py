@@ -1,4 +1,3 @@
-import base64
 from algosdk import encoding, atomic_transaction_composer
 import API_Controller
 from contract.application import Optimum
@@ -128,10 +127,10 @@ def get_winner_and_reward_amt(app_id, vrf_random_number):
     addresses = list(app_local_opt_balance.keys())
     return [addresses[random_number-1], reward_per_week]
 
-
-if __name__ == "__main__":
-    res = indexer_client.search_transactions(txid="M7I3UZNRECBHQPI7I5YR5EI6RK7K24GGEPTPH6V65HC2CHTQD7QQ")
-    return_value = res['transactions'][0]['logs'][0]
-    decoded_value = base64.b64decode(return_value)
-    print(decoded_value[4:])
-    print(int.from_bytes(decoded_value, 'big'))
+#
+# if __name__ == "__main__":
+#     res = indexer_client.search_transactions(txid="M7I3UZNRECBHQPI7I5YR5EI6RK7K24GGEPTPH6V65HC2CHTQD7QQ")
+#     return_value = res['transactions'][0]['logs'][0]
+#     decoded_value = base64.b64decode(return_value)
+#     print(decoded_value[4:])
+#     print(int.from_bytes(decoded_value, 'big'))
