@@ -1,12 +1,12 @@
 import time
 from algosdk.atomic_transaction_composer import AtomicTransactionComposer, AccountTransactionSigner
 from algosdk import encoding
-from connection import algo_conn
-from application import Optimum
+import API_Controller
+from contract.application import Optimum
 from beaker import client
 
 # Connect to Algod-Client in Testnet Network
-algod_client = algo_conn("testnet")
+algod_client = API_Controller.connection.algo_conn("testnet")
 # Create a Dummy Signer to fetch the transaction object
 ACCOUNT_SIGNER = AccountTransactionSigner("a" * 32)
 

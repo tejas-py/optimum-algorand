@@ -1,7 +1,7 @@
 from algosdk.atomic_transaction_composer import AtomicTransactionComposer, AccountTransactionSigner, TransactionWithSigner, transaction
 from algosdk import account, mnemonic
-import connection
-import application
+import API_Controller
+from contract.application import Optimum
 from beaker import client
 
 # get the account (ADMIN ACCOUNT)
@@ -12,14 +12,14 @@ ACCOUNT_SIGNER = AccountTransactionSigner(ACCOUNT_SECRET)
 # also add the fee account
 
 # Get algod client
-algod_client = connection.algo_conn("testnet")
+algod_client = API_Controller.connection.algo_conn("testnet")
 
 
 def deploy(OPT_asset_id):
 
     # Create an app client for our app
     app_client = client.ApplicationClient(
-        client=algod_client, app=application.Optimum(), signer=ACCOUNT_SIGNER
+        client=algod_client, app=Optimum(), signer=ACCOUNT_SIGNER
     )
 
     # Deploy the Application
@@ -35,7 +35,7 @@ def deploy(OPT_asset_id):
     params.fee = 2000
     params.flat_fee = True
     txn_details = app_client.call(
-        application.Optimum.opt_in_asa,
+        Optimum.opt_in_asa,
         ACCOUNT_ADDRESS,
         suggested_params=params,
         foreign_assets=[OPT_asset_id]
@@ -86,7 +86,4 @@ def deploy(OPT_asset_id):
     atc_optin.submit(algod_client)
     print("ASA Optin Transaction id:", atc_optin.tx_ids)
 
-
-if __name__ == "__main__":
-    deploy()
 

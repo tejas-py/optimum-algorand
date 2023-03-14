@@ -689,6 +689,6 @@ class Optimum(Application):
 
 if __name__ == "__main__":
 
-    Optimum().dump("./artifacts")
+    Optimum().dump("./contract")
 
 

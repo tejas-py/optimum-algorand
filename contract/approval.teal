@@ -1,6 +1,6 @@
 #pragma version 8
 intcblock 0 1 4 10000000000 10000000000000000 1000000 10000 1000
-bytecblock 0x41444d494e 0x474c4f42414c5f474f5645524e414e43455f4e4f4e4345 0x4c4f43414c5f57484954454c4953544544 0x4c4f43414c5f4f50545f414d4f554e54 0x474c4f42414c5f435553544f4449414c5f4445504f534954 0x4c4f43414c5f4445504f5349544544 0x4c4f43414c5f52454749535445524544 0x4c4f43414c5f564f544544 0x474c4f42414c5f524547495354524154494f4e5f454e44 0x474c4f42414c5f504155534544 0x474c4f42414c5f5245574152445f444953545249425554494f4e 0x474c4f42414c5f544f54414c5f4f50545f4449535045525345445f41545f474f5645524e414e4345 0x474c4f42414c5f4150505f42414c414e43455f41545f474f5645524e414e4345 0x474c4f42414c5f4c4153545f4c4f54544552595f44495350455253414c5f5453 0x4c4f43414c5f4f50545f5245574152445f414d4f554e54 0x 0x474c4f42414c5f504552494f445f5354415254 0x474c4f42414c5f504552494f445f454e44 0x474c4f42414c5f474f5645524e414e43455f5245574152445f524154455f4e554d424552 0x474c4f42414c5f474f5645524e414e43455f5245574152445f524154455f444543494d414c53
+bytecblock 0x41444d494e 0x474c4f42414c5f474f5645524e414e43455f4e4f4e4345 0x4c4f43414c5f57484954454c4953544544 0x4c4f43414c5f4f50545f414d4f554e54 0x474c4f42414c5f435553544f4449414c5f4445504f534954 0x4c4f43414c5f4445504f5349544544 0x4c4f43414c5f52454749535445524544 0x4c4f43414c5f564f544544 0x474c4f42414c5f524547495354524154494f4e5f454e44 0x 0x474c4f42414c5f504155534544 0x474c4f42414c5f5245574152445f444953545249425554494f4e 0x474c4f42414c5f544f54414c5f4f50545f4449535045525345445f41545f474f5645524e414e4345 0x474c4f42414c5f4150505f42414c414e43455f41545f474f5645524e414e4345 0x474c4f42414c5f4c4153545f4c4f54544552595f44495350455253414c5f5453 0x4c4f43414c5f4f50545f5245574152445f414d4f554e54 0x474c4f42414c5f504552494f445f5354415254 0x474c4f42414c5f504552494f445f454e44 0x474c4f42414c5f474f5645524e414e43455f5245574152445f524154455f4e554d424552 0x474c4f42414c5f474f5645524e414e43455f5245574152445f524154455f444543494d414c53
 txn NumAppArgs
 intc_0 // 0
 ==
@@ -14,7 +14,7 @@ pushbytes 0x19e93571 // "unpause_app()void"
 ==
 bnz main_l30
 txna ApplicationArgs 0
-pushbytes 0x918ae6e5 // "set_governance_timelines(uint64,uint64,uint64,uint64,uint64)void"
+pushbytes 0x12a408fa // "set_governance_timelines(uint64,uint64,uint64,uint64)void"
 ==
 bnz main_l29
 txna ApplicationArgs 0
@@ -34,7 +34,7 @@ pushbytes 0xc7ae81eb // "custodial_withdraw()void"
 ==
 bnz main_l25
 txna ApplicationArgs 0
-pushbytes 0x91c09459 // "opt_in_asa(uint64)void"
+pushbytes 0xbe2a6bcf // "opt_in_asa()void"
 ==
 bnz main_l24
 txna ApplicationArgs 0
@@ -42,11 +42,11 @@ pushbytes 0x15ea91b5 // "exchange(uint64,string)void"
 ==
 bnz main_l23
 txna ApplicationArgs 0
-pushbytes 0xf9acbe3b // "register_custodial_wallets()void"
+pushbytes 0x874654bb // "register_custodial_wallets(string)void"
 ==
 bnz main_l22
 txna ApplicationArgs 0
-pushbytes 0xc47c7771 // "vote_by_custodial_wallets()void"
+pushbytes 0x723b01a9 // "vote_by_custodial_wallets(string)void"
 ==
 bnz main_l21
 txna ApplicationArgs 0
@@ -76,9 +76,9 @@ intc_0 // 0
 &&
 assert
 callsub VRF_19
-store 12
+store 11
 pushbytes 0x151f7c75 // 0x151f7c75
-load 12
+load 11
 itob
 concat
 log
@@ -95,15 +95,15 @@ intc_0 // 0
 assert
 txna ApplicationArgs 1
 btoi
-store 9
+store 8
 txna ApplicationArgs 2
-store 10
+store 9
 txna ApplicationArgs 3
 btoi
-store 11
+store 10
+load 8
 load 9
 load 10
-load 11
 callsub disperselottery_18
 intc_1 // 1
 return
@@ -140,6 +140,7 @@ intc_0 // 0
 !=
 &&
 assert
+txna ApplicationArgs 1
 callsub votebycustodialwallets_15
 intc_1 // 1
 return
@@ -152,6 +153,7 @@ intc_0 // 0
 !=
 &&
 assert
+txna ApplicationArgs 1
 callsub registercustodialwallets_14
 intc_1 // 1
 return
@@ -166,11 +168,11 @@ intc_0 // 0
 assert
 txna ApplicationArgs 1
 btoi
-store 7
+store 6
 txna ApplicationArgs 2
-store 8
+store 7
+load 6
 load 7
-load 8
 callsub exchange_13
 intc_1 // 1
 return
@@ -183,8 +185,6 @@ intc_0 // 0
 !=
 &&
 assert
-txna ApplicationArgs 1
-btoi
 callsub optinasa_12
 intc_1 // 1
 return
@@ -235,12 +235,12 @@ intc_0 // 0
 assert
 txna ApplicationArgs 1
 btoi
-store 5
+store 4
 txna ApplicationArgs 2
 btoi
-store 6
+store 5
+load 4
 load 5
-load 6
 callsub setgovernancerewardrate_8
 intc_1 // 1
 return
@@ -265,14 +265,10 @@ store 2
 txna ApplicationArgs 4
 btoi
 store 3
-txna ApplicationArgs 5
-btoi
-store 4
 load 0
 load 1
 load 2
 load 3
-load 4
 callsub setgovernancetimelines_7
 intc_1 // 1
 return
@@ -369,15 +365,15 @@ proto 0 0
 intc_0 // 0
 bytec_0 // "ADMIN"
 app_global_get_ex
-store 14
 store 13
-load 14
+store 12
+load 13
 !
 assert
 bytec_0 // "ADMIN"
 txn Sender
 app_global_put
-bytec 9 // "GLOBAL_PAUSED"
+bytec 10 // "GLOBAL_PAUSED"
 intc_0 // 0
 app_global_put
 bytec_1 // "GLOBAL_GOVERNANCE_NONCE"
@@ -386,7 +382,7 @@ app_global_put
 bytec 16 // "GLOBAL_PERIOD_START"
 intc_0 // 0
 app_global_put
-bytec 10 // "GLOBAL_REWARD_DISTRIBUTION"
+bytec 11 // "GLOBAL_REWARD_DISTRIBUTION"
 intc_0 // 0
 app_global_put
 bytec 8 // "GLOBAL_REGISTRATION_END"
@@ -404,13 +400,13 @@ app_global_put
 bytec 19 // "GLOBAL_GOVERNANCE_REWARD_RATE_DECIMALS"
 intc_0 // 0
 app_global_put
-bytec 11 // "GLOBAL_TOTAL_OPT_DISPERSED_AT_GOVERNANCE"
+bytec 12 // "GLOBAL_TOTAL_OPT_DISPERSED_AT_GOVERNANCE"
 intc_0 // 0
 app_global_put
-bytec 12 // "GLOBAL_APP_BALANCE_AT_GOVERNANCE"
+bytec 13 // "GLOBAL_APP_BALANCE_AT_GOVERNANCE"
 intc_0 // 0
 app_global_put
-bytec 13 // "GLOBAL_LAST_LOTTERY_DISPERSAL_TS"
+bytec 14 // "GLOBAL_LAST_LOTTERY_DISPERSAL_TS"
 intc_0 // 0
 app_global_put
 retsub
@@ -461,7 +457,7 @@ bytec_3 // "LOCAL_OPT_AMOUNT"
 intc_0 // 0
 app_local_put
 txn Sender
-bytec 14 // "LOCAL_OPT_REWARD_AMOUNT"
+bytec 15 // "LOCAL_OPT_REWARD_AMOUNT"
 intc_0 // 0
 app_local_put
 retsub
@@ -490,7 +486,7 @@ app_global_get
 ==
 &&
 assert
-bytec 9 // "GLOBAL_PAUSED"
+bytec 10 // "GLOBAL_PAUSED"
 intc_1 // 1
 app_global_put
 retsub
@@ -520,19 +516,19 @@ app_global_get
 ==
 // Only Admin can call this transaction.
 assert
-bytec 9 // "GLOBAL_PAUSED"
+bytec 10 // "GLOBAL_PAUSED"
 intc_0 // 0
 app_global_put
 retsub
 
 // set_governance_timelines
 setgovernancetimelines_7:
-proto 5 0
+proto 4 0
 global CurrentApplicationAddress
-frame_dig -5
+txna Assets 0
 asset_holding_get AssetBalance
-store 16
 store 15
+store 14
 intc_0 // 0
 gtxns RekeyTo
 global ZeroAddress
@@ -567,7 +563,7 @@ assert
 bytec 16 // "GLOBAL_PERIOD_START"
 frame_dig -2
 app_global_put
-bytec 10 // "GLOBAL_REWARD_DISTRIBUTION"
+bytec 11 // "GLOBAL_REWARD_DISTRIBUTION"
 frame_dig -4
 app_global_put
 bytec 8 // "GLOBAL_REGISTRATION_END"
@@ -587,12 +583,12 @@ app_global_get
 intc_1 // 1
 >
 bz setgovernancetimelines_7_l2
-bytec 11 // "GLOBAL_TOTAL_OPT_DISPERSED_AT_GOVERNANCE"
+bytec 12 // "GLOBAL_TOTAL_OPT_DISPERSED_AT_GOVERNANCE"
 intc 4 // 10000000000000000
-load 15
+load 14
 -
 app_global_put
-bytec 12 // "GLOBAL_APP_BALANCE_AT_GOVERNANCE"
+bytec 13 // "GLOBAL_APP_BALANCE_AT_GOVERNANCE"
 global CurrentApplicationAddress
 balance
 bytec 4 // "GLOBAL_CUSTODIAL_DEPOSIT"
@@ -704,19 +700,19 @@ app_global_get
 &&
 assert
 intc_1 // 1
-store 17
+store 16
 custodialdeposit_10_l1:
-load 17
+load 16
 txn NumAccounts
 <=
 bz custodialdeposit_10_l3
-load 17
+load 16
 txnas Accounts
 bytec_2 // "LOCAL_WHITELISTED"
 app_local_get
 intc_1 // 1
 ==
-load 17
+load 16
 txnas Accounts
 bytec 5 // "LOCAL_DEPOSITED"
 app_local_get
@@ -728,7 +724,7 @@ assert
 itxn_begin
 intc_1 // pay
 itxn_field TypeEnum
-load 17
+load 16
 txnas Accounts
 itxn_field Receiver
 intc_3 // 10000000000
@@ -736,7 +732,7 @@ itxn_field Amount
 intc_0 // 0
 itxn_field Fee
 itxn_submit
-load 17
+load 16
 txnas Accounts
 bytec 5 // "LOCAL_DEPOSITED"
 intc 6 // 10000
@@ -747,10 +743,10 @@ app_global_get
 intc_3 // 10000000000
 +
 app_global_put
-load 17
+load 16
 intc_1 // 1
 +
-store 17
+store 16
 b custodialdeposit_10_l1
 custodialdeposit_10_l3:
 retsub
@@ -774,19 +770,19 @@ global ZeroAddress
 &&
 assert
 intc_1 // 1
-store 18
+store 17
 custodialwithdraw_11_l1:
-load 18
+load 17
 txn NumAccounts
 <=
 bz custodialwithdraw_11_l3
-load 18
+load 17
 txnas Accounts
 bytec_2 // "LOCAL_WHITELISTED"
 app_local_get
 intc_1 // 1
 ==
-load 18
+load 17
 txnas Accounts
 bytec 5 // "LOCAL_DEPOSITED"
 app_local_get
@@ -797,7 +793,7 @@ assert
 itxn_begin
 intc_1 // pay
 itxn_field TypeEnum
-load 18
+load 17
 txnas Accounts
 itxn_field Sender
 global CurrentApplicationAddress
@@ -807,7 +803,7 @@ itxn_field Amount
 intc_0 // 0
 itxn_field Fee
 itxn_submit
-load 18
+load 17
 txnas Accounts
 bytec 5 // "LOCAL_DEPOSITED"
 intc_0 // 0
@@ -818,22 +814,22 @@ app_global_get
 intc_3 // 10000000000
 -
 app_global_put
-load 18
+load 17
 intc_1 // 1
 +
-store 18
+store 17
 b custodialwithdraw_11_l1
 custodialwithdraw_11_l3:
 retsub
 
 // opt_in_asa
 optinasa_12:
-proto 1 0
+proto 0 0
 global CurrentApplicationAddress
-frame_dig -1
+txna Assets 0
 asset_holding_get AssetBalance
-store 20
 store 19
+store 18
 global GroupSize
 intc_1 // 1
 ==
@@ -852,11 +848,7 @@ global ZeroAddress
 ==
 &&
 &&
-frame_dig -1
-txna Assets 0
-==
-&&
-load 19
+load 18
 intc_0 // 0
 ==
 &&
@@ -864,7 +856,7 @@ assert
 itxn_begin
 intc_2 // axfer
 itxn_field TypeEnum
-frame_dig -1
+txna Assets 0
 itxn_field XferAsset
 global CurrentApplicationAddress
 itxn_field AssetReceiver
@@ -933,8 +925,8 @@ exchange_13_l3:
 global CurrentApplicationAddress
 frame_dig -2
 asset_holding_get AssetBalance
-store 25
 store 24
+store 23
 gtxn 0 XferAsset
 frame_dig -2
 ==
@@ -953,19 +945,19 @@ intc 5 // 1000000
 -
 *
 intc 4 // 10000000000000000
-load 24
+load 23
 gtxn 0 AssetAmount
 -
 -
 /
-store 26
+store 25
 itxn_begin
 intc_1 // pay
 itxn_field TypeEnum
 frame_dig -1
 extract 2 0
 itxn_field Receiver
-load 26
+load 25
 intc 7 // 1000
 /
 itxn_field Amount
@@ -977,8 +969,8 @@ intc_1 // pay
 itxn_field TypeEnum
 txn Sender
 itxn_field Receiver
-load 26
-load 26
+load 25
+load 25
 intc 7 // 1000
 /
 -
@@ -1005,12 +997,12 @@ exchange_13_l5:
 global CurrentApplicationAddress
 frame_dig -2
 asset_holding_get AssetBalance
-store 22
 store 21
+store 20
 txna Assets 0
 frame_dig -2
 ==
-bytec 10 // "GLOBAL_REWARD_DISTRIBUTION"
+bytec 11 // "GLOBAL_REWARD_DISTRIBUTION"
 app_global_get
 global LatestTimestamp
 <=
@@ -1021,7 +1013,7 @@ app_global_get
 <=
 &&
 assert
-load 21
+load 20
 intc 4 // 10000000000000000
 ==
 bytec_1 // "GLOBAL_GOVERNANCE_NONCE"
@@ -1031,13 +1023,13 @@ intc_1 // 1
 ||
 bnz exchange_13_l8
 gtxn 0 Amount
-bytec 11 // "GLOBAL_TOTAL_OPT_DISPERSED_AT_GOVERNANCE"
+bytec 12 // "GLOBAL_TOTAL_OPT_DISPERSED_AT_GOVERNANCE"
 app_global_get
 *
-bytec 12 // "GLOBAL_APP_BALANCE_AT_GOVERNANCE"
+bytec 13 // "GLOBAL_APP_BALANCE_AT_GOVERNANCE"
 app_global_get
 /
-store 23
+store 22
 exchange_13_l7:
 itxn_begin
 intc_2 // axfer
@@ -1046,7 +1038,7 @@ frame_dig -2
 itxn_field XferAsset
 txn Sender
 itxn_field AssetReceiver
-load 23
+load 22
 itxn_field AssetAmount
 intc_0 // 0
 itxn_field Fee
@@ -1056,20 +1048,20 @@ bytec_3 // "LOCAL_OPT_AMOUNT"
 txn Sender
 bytec_3 // "LOCAL_OPT_AMOUNT"
 app_local_get
-load 23
+load 22
 +
 app_local_put
 b exchange_13_l9
 exchange_13_l8:
 gtxn 0 Amount
-store 23
+store 22
 b exchange_13_l7
 exchange_13_l9:
 retsub
 
 // register_custodial_wallets
 registercustodialwallets_14:
-proto 0 0
+proto 1 0
 txn GroupIndex
 gtxns RekeyTo
 global ZeroAddress
@@ -1096,19 +1088,19 @@ app_global_get
 &&
 assert
 intc_1 // 1
-store 27
+store 26
 registercustodialwallets_14_l1:
-load 27
+load 26
 txn NumAccounts
 <
 bz registercustodialwallets_14_l3
-load 27
+load 26
 txnas Accounts
 bytec_2 // "LOCAL_WHITELISTED"
 app_local_get
 intc_1 // 1
 ==
-load 27
+load 26
 txnas Accounts
 bytec 6 // "LOCAL_REGISTERED"
 app_local_get
@@ -1120,35 +1112,36 @@ assert
 itxn_begin
 intc_1 // pay
 itxn_field TypeEnum
-load 27
+load 26
 txnas Accounts
 itxn_field Sender
-txna ApplicationArgs 1
+txna Accounts 2
 itxn_field Receiver
 intc_0 // 0
 itxn_field Amount
-txna ApplicationArgs 2
+frame_dig -1
+extract 2 0
 itxn_field Note
 intc_0 // 0
 itxn_field Fee
 itxn_submit
-load 27
+load 26
 txnas Accounts
 bytec 6 // "LOCAL_REGISTERED"
 bytec_1 // "GLOBAL_GOVERNANCE_NONCE"
 app_global_get
 app_local_put
-load 27
+load 26
 intc_1 // 1
 +
-store 27
+store 26
 b registercustodialwallets_14_l1
 registercustodialwallets_14_l3:
 retsub
 
 // vote_by_custodial_wallets
 votebycustodialwallets_15:
-proto 0 0
+proto 1 0
 txn GroupIndex
 gtxns RekeyTo
 global ZeroAddress
@@ -1170,19 +1163,19 @@ app_global_get
 &&
 assert
 intc_1 // 1
-store 28
+store 27
 votebycustodialwallets_15_l1:
-load 28
+load 27
 txn NumAccounts
 <
 bz votebycustodialwallets_15_l3
-load 28
+load 27
 txnas Accounts
 bytec_2 // "LOCAL_WHITELISTED"
 app_local_get
 intc_1 // 1
 ==
-load 28
+load 27
 txnas Accounts
 bytec 6 // "LOCAL_REGISTERED"
 app_local_get
@@ -1190,7 +1183,7 @@ bytec_1 // "GLOBAL_GOVERNANCE_NONCE"
 app_global_get
 ==
 &&
-load 28
+load 27
 txnas Accounts
 bytec 7 // "LOCAL_VOTED"
 app_local_get
@@ -1202,28 +1195,29 @@ assert
 itxn_begin
 intc_1 // pay
 itxn_field TypeEnum
-load 28
+load 27
 txnas Accounts
 itxn_field Sender
-txna ApplicationArgs 1
+txna Accounts 2
 itxn_field Receiver
 intc_0 // 0
 itxn_field Amount
-txna ApplicationArgs 2
+frame_dig -1
+extract 2 0
 itxn_field Note
 intc_0 // 0
 itxn_field Fee
 itxn_submit
-load 28
+load 27
 txnas Accounts
 bytec 7 // "LOCAL_VOTED"
 bytec_1 // "GLOBAL_GOVERNANCE_NONCE"
 app_global_get
 app_local_put
-load 28
+load 27
 intc_1 // 1
 +
-store 28
+store 27
 b votebycustodialwallets_15_l1
 votebycustodialwallets_15_l3:
 retsub
@@ -1252,19 +1246,19 @@ app_global_get
 &&
 assert
 intc_1 // 1
-store 29
+store 28
 custodialwithdrawrewards_16_l1:
-load 29
+load 28
 txn NumAccounts
 <=
 bz custodialwithdrawrewards_16_l3
-load 29
+load 28
 txnas Accounts
 bytec_2 // "LOCAL_WHITELISTED"
 app_local_get
 intc_1 // 1
 ==
-load 29
+load 28
 txnas Accounts
 bytec 6 // "LOCAL_REGISTERED"
 app_local_get
@@ -1272,7 +1266,7 @@ bytec_1 // "GLOBAL_GOVERNANCE_NONCE"
 app_global_get
 ==
 &&
-load 29
+load 28
 txnas Accounts
 bytec 7 // "LOCAL_VOTED"
 app_local_get
@@ -1280,10 +1274,10 @@ bytec_1 // "GLOBAL_GOVERNANCE_NONCE"
 app_global_get
 ==
 &&
-load 29
+load 28
 txnas Accounts
 balance
-load 29
+load 28
 txnas ApplicationArgs
 btoi
 -
@@ -1294,22 +1288,22 @@ assert
 itxn_begin
 intc_1 // pay
 itxn_field TypeEnum
-load 29
+load 28
 txnas Accounts
 itxn_field Sender
 global CurrentApplicationAddress
 itxn_field Receiver
-load 29
+load 28
 txnas ApplicationArgs
 btoi
 itxn_field Amount
 intc_0 // 0
 itxn_field Fee
 itxn_submit
-load 29
+load 28
 intc_1 // 1
 +
-store 29
+store 28
 b custodialwithdrawrewards_16_l1
 custodialwithdrawrewards_16_l3:
 retsub
@@ -1338,13 +1332,13 @@ app_global_get
 ==
 assert
 intc_1 // 1
-store 30
+store 29
 custodialclosewallets_17_l1:
-load 30
+load 29
 txn NumAccounts
 <=
 bz custodialclosewallets_17_l3
-load 30
+load 29
 txnas Accounts
 bytec_2 // "LOCAL_WHITELISTED"
 app_local_get
@@ -1354,7 +1348,7 @@ assert
 itxn_begin
 intc_1 // pay
 itxn_field TypeEnum
-load 30
+load 29
 txnas Accounts
 itxn_field Sender
 global CurrentApplicationAddress
@@ -1366,10 +1360,10 @@ itxn_field RekeyTo
 intc_0 // 0
 itxn_field Fee
 itxn_submit
-load 30
+load 29
 intc_1 // 1
 +
-store 30
+store 29
 b custodialclosewallets_17_l1
 custodialclosewallets_17_l3:
 retsub
@@ -1398,7 +1392,7 @@ app_global_get
 ==
 assert
 global LatestTimestamp
-bytec 13 // "GLOBAL_LAST_LOTTERY_DISPERSAL_TS"
+bytec 14 // "GLOBAL_LAST_LOTTERY_DISPERSAL_TS"
 app_global_get
 -
 pushint 82800 // 82800
@@ -1431,13 +1425,13 @@ itxn_field AssetAmount
 intc_0 // 0
 itxn_field Fee
 itxn_submit
-bytec 13 // "GLOBAL_LAST_LOTTERY_DISPERSAL_TS"
+bytec 14 // "GLOBAL_LAST_LOTTERY_DISPERSAL_TS"
 global LatestTimestamp
 app_global_put
 txna Accounts 1
-bytec 14 // "LOCAL_OPT_REWARD_AMOUNT"
+bytec 15 // "LOCAL_OPT_REWARD_AMOUNT"
 txn Sender
-bytec 14 // "LOCAL_OPT_REWARD_AMOUNT"
+bytec 15 // "LOCAL_OPT_REWARD_AMOUNT"
 app_local_get
 frame_dig -1
 +
@@ -1456,14 +1450,42 @@ retsub
 VRF_19:
 proto 0 1
 intc_0 // 0
-bytec 15 // ""
+bytec 9 // ""
 intc_0 // 0
-bytec 15 // ""
+bytec 9 // ""
 intc_0 // 0
 dup
-bytec 15 // ""
+bytec 9 // ""
 dup
 intc_0 // 0
+global Round
+pushint 10 // 10
+-
+frame_bury 2
+intc_0 // 0
+frame_bury 8
+frame_dig 8
+itob
+extract 6 0
+bytec 9 // ""
+concat
+frame_bury 3
+itxn_begin
+pushint 6 // appl
+itxn_field TypeEnum
+txna Applications 1
+itxn_field ApplicationID
+pushbytes 0x47c20c23 // "must_get(uint64,byte[])byte[]"
+itxn_field ApplicationArgs
+frame_dig 2
+itob
+itxn_field ApplicationArgs
+frame_dig 3
+itxn_field ApplicationArgs
+itxn_submit
+itxn LastLog
+extract 0 9
+frame_bury 1
 frame_dig 1
 extract 2 0
 btoi
