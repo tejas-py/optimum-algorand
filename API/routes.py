@@ -1,6 +1,6 @@
 from flask import Flask, redirect
 from flask_cors import CORS
-import Service
+from API import Service
 
 # defining the flask app and setting up cors
 app = Flask(__name__)
@@ -98,8 +98,3 @@ def get_custodial_wallets_with_extra_bal_route():
 @app.post('/blockchain/withdraw_rewards/withdraw_rewards_from_custodial_wallets')
 def withdraw_rewards_from_custodial_wallets_route():
     return Service.withdraw_rewards.withdraw_rewards_from_custodial_wallets(opt_app_id)
-
-
-# running the API
-if __name__ == "__main__":
-    app.run(debug=True, port=3000)
