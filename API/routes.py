@@ -31,7 +31,7 @@ def application_optin_route():
 
 
 @app.post('/blockchain/optin/asset')
-def application_optin_route():
+def asset_optin_route():
     return API.Service.common_txn.asset_optin(opt_asa_id)
 
 
