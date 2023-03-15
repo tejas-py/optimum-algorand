@@ -23,7 +23,7 @@ def deposit(opt_app_id, opt_asa_id):
     # check if the wallet contains balance to execute the transaction
     if wallet_info == "True":
         try:
-            txn_object = transactions.run.deposit.deposit(sender_wallet, opt_app_id, opt_asa_id, algo_amt)
+            txn_object = transactions.Controller.deposit.deposit(sender_wallet, opt_app_id, opt_asa_id, algo_amt)
             return jsonify(txn_object), 200
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500
@@ -53,7 +53,7 @@ def fund_custodian_wallets(opt_app_id):
     # check if the wallet contains balance to execute the transaction
     if wallet_info == "True":
         try:
-            txn_object = transactions.run.deposit.fund_custodian_wallets(sender_wallet, opt_app_id, deposit_amt)
+            txn_object = transactions.Controller.deposit.fund_custodian_wallets(sender_wallet, opt_app_id, deposit_amt)
             return jsonify(txn_object), 200
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500

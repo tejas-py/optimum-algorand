@@ -3,17 +3,19 @@ import utils
 import transactions
 
 
-def whitelist_account(opt_app_id):
+def register_by_custodial_wallets(opt_app_id):
 
     try:
         # get the details from the payload as json object
-        disperse_lottery_payload = request.get_json()
-        sender_wallet = disperse_lottery_payload['sender_waller']
+        register_payload = request.get_json()
+        sender_wallet = register_payload['sender_waller']
+        txn_note = register_payload['txn_note']
+        governance_address = register_payload['governance_address']
     except Exception as error:
         return jsonify({'message': f'Payload Error! Key Missing: {error}'}), 400
 
     # Amount required for the function to execute.
-    function_transaction_fees = 1000  # one Transaction of fees 1000
+    function_transaction_fees = 1000  # Unknown number of transaction will be executed, so will take 1000
 
     # Wallet Information
     wallet_info = utils.common_functions.check_balance(sender_wallet, function_transaction_fees)
@@ -21,12 +23,12 @@ def whitelist_account(opt_app_id):
     # check if the wallet contains balance to execute the transaction
     if wallet_info == "True":
         try:
-            txn_object = transactions.run.get_accts_and_whitelist.whitelist_account(sender_wallet, opt_app_id)
+            txn_object = transactions.Controller.register.register_by_custodial_wallets(sender_wallet, opt_app_id,
+                                                                                 governance_address, txn_note)
             return jsonify(txn_object), 200
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500
     elif wallet_info == "False":
-        jsonify({'message': f"Wallet Balance Low, required amount: {function_transaction_fees}"}), 400
-
+        jsonify({'message': f"Wallet Balance Low, required amount: {1000}"}), 400
     else:
         return wallet_info

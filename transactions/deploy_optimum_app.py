@@ -1,6 +1,6 @@
 from algosdk.atomic_transaction_composer import AtomicTransactionComposer, AccountTransactionSigner, TransactionWithSigner, transaction
 from algosdk import account, mnemonic
-import API_Controller
+import API
 from contract.application import Optimum
 from beaker import client
 
@@ -12,7 +12,7 @@ ACCOUNT_SIGNER = AccountTransactionSigner(ACCOUNT_SECRET)
 # also add the fee account
 
 # Get algod client
-algod_client = API_Controller.connection.algo_conn("testnet")
+algod_client = API.connection.algo_conn("testnet")
 
 
 def deploy(OPT_asset_id):

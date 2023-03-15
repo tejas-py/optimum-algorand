@@ -1,13 +1,13 @@
 from algosdk import encoding, atomic_transaction_composer, transaction, logic
-import API_Controller
+import API
 from contract.application import Optimum
 from beaker import client
 import utils
 
 
 # Connect to Algod-Client and Indexer-Client in Testnet Network
-algod_client = API_Controller.connection.algo_conn("testnet")
-indexer_client = API_Controller.connection.connect_indexer('testnet')
+algod_client = API.connection.algo_conn("testnet")
+indexer_client = API.connection.connect_indexer('testnet')
 # Create a Dummy Signer to fetch the transaction object
 ACCOUNT_SIGNER = atomic_transaction_composer.AccountTransactionSigner("a" * 32)
 

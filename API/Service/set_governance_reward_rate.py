@@ -21,7 +21,7 @@ def reward_rate(opt_app_id):
     # check if the wallet contains balance to execute the transaction
     if wallet_info == "True":
         try:
-            txn_object = transactions.run.set_governance_reward_rate.reward_rate(admin_wallet, opt_app_id)
+            txn_object = transactions.Controller.set_governance_reward_rate.reward_rate(admin_wallet, opt_app_id)
             return jsonify(txn_object), 200
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500
