@@ -77,7 +77,7 @@ def fund_custodian_wallets(sender_wallet, app_id, deposit_amt):
     if len(custodial_wallets_orig) < req_wallets:
         return {'message': f"Not enough wallets to fund."
                            f"Required ${req_wallets} but got ${custodial_wallets_orig.length}."
-                           f"Please generate more accounts"}
+                           f"Please generate more accounts"}, 400
 
     # we only get address we need
     custodial_wallets = custodial_wallets_orig[0:req_wallets]

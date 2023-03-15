@@ -2,6 +2,7 @@ from algosdk import atomic_transaction_composer, logic
 import API_Controller
 from contract.application import Optimum
 from beaker import client
+from flask import jsonify
 
 # Connect to Algod-Client and Indexer-Client in Testnet Network
 algod_client = API_Controller.connection.algo_conn("testnet")
@@ -61,3 +62,20 @@ def chunky_array(my_array, chunk_size):
         index += chunk_size
 
     return temp_array
+
+
+# check the balance with the amount, if the wallet does not have minimum amount, the function will return false.
+def check_balance(wallet_address, amt):
+
+    try:
+        account_i = algod_client.account_info(wallet_address)
+        locked_balance = account_i['min-balance']
+        balance = account_i['amount']
+        available_balance = balance - locked_balance
+
+        if balance >= amt and available_balance > amt:
+            return "True"
+        else:
+            return "False"
+    except Exception as error:
+        return jsonify({'message': f"Wallet not found! Error: {error}"}), 400

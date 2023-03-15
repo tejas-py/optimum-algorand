@@ -9,7 +9,7 @@ algod_client = API_Controller.connection.algo_conn("testnet")
 ACCOUNT_SIGNER = atomic_transaction_composer.AccountTransactionSigner("a" * 32)
 
 
-def main(admin_wallet, app_id):
+def reward_rate(admin_wallet, app_id):
 
     # Create  an app client for our app
     app_client = client.ApplicationClient(
