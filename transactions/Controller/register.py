@@ -44,7 +44,7 @@ def register_by_custodial_wallets(sender_wallet, app_id, governance_address, mem
             txn_note=memo
         )
         # push the txn object into the transaction array
-        txn_array.append(atc.txn_list[0])
+        txn_array.append(atc.txn_list[0].txn)
         j += 1
 
     # Assemble the transactions in group of 16, and pass return the transaction object

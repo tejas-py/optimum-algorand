@@ -85,5 +85,3 @@ def deploy(OPT_asset_id):
     )
     atc_optin.submit(algod_client)
     print("ASA Optin Transaction id:", atc_optin.tx_ids)
-
-

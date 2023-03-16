@@ -42,6 +42,7 @@ def withdraw(sender_wallet, fee_address, app_id, asset_id, opt_amt):
     # create param for transaction 2
     params_txn2 = algod_client.suggested_params()
     params_txn2.fee = 3000
+    params_txn2.flat_fee = True
 
     # create 2nd transaction object
     app_client.add_method_call(
@@ -54,8 +55,8 @@ def withdraw(sender_wallet, fee_address, app_id, asset_id, opt_amt):
     )
 
     # fetch the transaction objects
-    txn_1 = atc.txn_list[0]
-    txn_2 = atc.txn_list[1]
+    txn_1 = atc.txn_list[0].txn
+    txn_2 = atc.txn_list[1].txn
 
     # Group Transactions
     print("Grouping transactions...")
@@ -145,7 +146,7 @@ def withdraw_from_custodial_wallets(sender_wallet, app_id, withdraw_amt):
             accounts=[txn_accounts_array[j]]
         )
         # push the txn object into the transaction array
-        txn_array.append(atc.txn_list[0])
+        txn_array.append(atc.txn_list[0].txn)
         j += 1
 
     # Assemble the transactions in group of 16, and pass return the transaction object

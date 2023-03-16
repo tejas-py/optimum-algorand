@@ -8,7 +8,7 @@ def whitelist_account(opt_app_id):
     try:
         # get the details from the payload as json object
         disperse_lottery_payload = request.get_json()
-        sender_wallet = disperse_lottery_payload['sender_waller']
+        sender_wallet = disperse_lottery_payload['sender_wallet']
     except Exception as error:
         return jsonify({'message': f'Payload Error! Key Missing: {error}'}), 400
 

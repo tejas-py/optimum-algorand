@@ -127,10 +127,10 @@ class Optimum(Application):
         return Balance(Global.current_application_address()) + self.GLOBAL_CUSTODIAL_DEPOSIT.get() - Int(int(10e5))
 
     @internal
-    def handle_deposit(self, opt_asa_id: abi.Uint64):
+    def handle_deposit(self):
         optBalOfAppAcc = AssetHolding.balance(
             Global.current_application_address(),
-            opt_asa_id
+            Gtxn[1].assets[0]
         )
         scratch_amount = ScratchVar(TealType.uint64)
         def saveAmount(amount): return scratch_amount.store(amount)
@@ -140,7 +140,7 @@ class Optimum(Application):
             optBalOfAppAcc,
             Assert(
                 And(
-                    Txn.assets[0] == opt_asa_id,
+                    Txn.assets[0] == Gtxn[1].assets[0],
                     # reward_distribution <= now <= registration_end (deposit window)
                     self.GLOBAL_REWARD_DISTRIBUTION.get() <= Global.latest_timestamp(),
                     Global.latest_timestamp() <= self.GLOBAL_REGISTRATION_END.get(),
@@ -161,7 +161,7 @@ class Optimum(Application):
             InnerTxnBuilder.SetFields(
                 {
                     TxnField.type_enum: TxnType.AssetTransfer,
-                    TxnField.xfer_asset: opt_asa_id,
+                    TxnField.xfer_asset: Gtxn[1].assets[0],
                     TxnField.asset_receiver: Txn.sender(),
                     TxnField.asset_amount: amount(),
                     # fee is set externally
@@ -177,10 +177,10 @@ class Optimum(Application):
         )
 
     @internal
-    def handle_withdraw(self, opt_asa_id: abi.Uint64, fee_addr: abi.String):
+    def handle_withdraw(self):
         optBalOfAppAcc = AssetHolding.balance(
             Global.current_application_address(),
-            opt_asa_id
+            Gtxn[1].assets[0]
         )
         scratch_amount = ScratchVar(TealType.uint64)
         def saveAmount(amount): return scratch_amount.store(amount)
@@ -189,7 +189,7 @@ class Optimum(Application):
             optBalOfAppAcc,
             Assert(
                 And(
-                    Gtxn[0].xfer_asset() == opt_asa_id,
+                    Gtxn[0].xfer_asset() == Gtxn[1].assets[0],
                     Gtxn[0].asset_amount() > Int(0)
                 )
             ),
@@ -210,7 +210,7 @@ class Optimum(Application):
             InnerTxnBuilder.SetFields(
                 {
                     TxnField.type_enum: TxnType.Payment,
-                    TxnField.receiver: fee_addr,
+                    TxnField.receiver: Gtxn[1].accounts[1],
                     TxnField.amount: amount() / Int(1000), # algoWithdrawAmount * .001 (0.1% fee)
                     # fee is set externally
                     TxnField.fee: Int(0)
@@ -434,7 +434,7 @@ class Optimum(Application):
         )
 
     @external
-    def exchange(self, opt_asset_index: abi.Uint64, arg_fee_address: abi.String):
+    def exchange(self):
         return Seq(
             Assert(
                 And(
@@ -446,10 +446,12 @@ class Optimum(Application):
                     )
             ),
             If(Gtxn[0].type_enum() == TxnType.Payment)
-            .Then(self.handle_deposit(opt_asa_id=opt_asset_index.get()))
+            # Gtxn1.asset 0 == OPT Asset id
+            # Gtxn1.accounts 1 == Fee Address
+            .Then(self.handle_deposit())
 
             .ElseIf(Gtxn[0].type_enum() == TxnType.AssetTransfer)
-            .Then(self.handle_withdraw(opt_asa_id=opt_asset_index.get(), fee_addr=arg_fee_address.get()))
+            .Then(self.handle_withdraw())
 
             .Else(Err())
         )

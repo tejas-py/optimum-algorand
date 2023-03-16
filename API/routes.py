@@ -9,8 +9,8 @@ cors = CORS(app, resources={
 })
 
 # Global Constant, Optimum App id and Optimum Asset id
-opt_app_id = ""
-opt_asa_id = ""
+opt_app_id = 165037939
+opt_asa_id = 75919707
 
 
 # home page

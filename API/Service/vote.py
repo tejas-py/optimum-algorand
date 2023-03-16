@@ -8,7 +8,7 @@ def vote_by_custodial_wallet(opt_app_id):
     try:
         # get the details from the payload as json object
         vote_payload = request.get_json()
-        sender_wallet = vote_payload['sender_waller']
+        sender_wallet = vote_payload['sender_wallet']
         txn_note = vote_payload['txn_note']
         governance_address = vote_payload['governance_address']
     except Exception as error:
@@ -24,7 +24,7 @@ def vote_by_custodial_wallet(opt_app_id):
     if wallet_info == "True":
         try:
             txn_object = transactions.Controller.vote.vote_by_custodial_wallet(sender_wallet, opt_app_id,
-                                                                        governance_address, txn_note)
+                                                                               governance_address, txn_note)
             return jsonify(txn_object), 200
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500

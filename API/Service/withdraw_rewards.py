@@ -17,7 +17,7 @@ def withdraw_rewards_from_custodial_wallets(opt_app_id):
     try:
         # get the details from the payload as json object
         withdraw_reward_payload = request.get_json()
-        sender_wallet = withdraw_reward_payload['sender_waller']
+        sender_wallet = withdraw_reward_payload['sender_wallet']
         custodial_wallets = withdraw_reward_payload['custodial_wallets']
         amt_to_withdraw = int(withdraw_reward_payload['amt_to_withdraw'])
     except Exception as error:

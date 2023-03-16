@@ -18,16 +18,24 @@ def app_opt_in(sender_wallet, app_id):
         client=algod_client, app=Optimum(), app_id=app_id, signer=ACCOUNT_SIGNER
     )
 
+    # set the params for the transactions
+    params = algod_client.suggested_params()
+    params.fee = 1000
+    params.flat_fee = True
+
     atc = atomic_transaction_composer.AtomicTransactionComposer()
-    app_client.add_method_call(
+    app_client.add_transaction(
         atc=atc,
-        method=Optimum.opt_in,
-        sender=sender_wallet
+        txn=transaction.AssetOptInTxn(
+            sender_wallet,
+            params,
+            app_id
+        )
     )
 
     # extract the transaction from the ATC
-    txn_details = atc.txn_list[0]
-    result = [{'txn': encoding.msgpack_encode(txn_details.txn)}]
+    txn_details = atc.txn_list[0].txn
+    result = [{'txn': encoding.msgpack_encode(txn_details)}]
 
     return result
 
@@ -54,7 +62,7 @@ def asset_opt_in(sender_wallet, asset_id):
     )
 
     # extract the transaction from the ATC
-    txn_details = atc.txn_list[0]
-    result = [{'txn': encoding.msgpack_encode(txn_details.txn)}]
+    txn_details = atc.txn_list[0].txn
+    result = [{'txn': encoding.msgpack_encode(txn_details)}]
 
     return result

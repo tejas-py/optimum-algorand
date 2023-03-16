@@ -27,9 +27,10 @@ def get_custodial_wallets_with_extra_bal(app_id):
         application_id=app_id, auth_addr=logic.get_application_address(app_id)
     )
 
-    custodial_wallets = [], amts_to_withdraw = []
-    for account in res.accounts:
-        local_state = app_client.get_account_state(account.address, app_id)
+    custodial_wallets = []
+    amts_to_withdraw = []
+    for account in res['accounts']:
+        local_state = app_client.get_account_state(account['address'], app_id)
         if local_state == {}:
             continue
 
@@ -104,6 +105,3 @@ def withdraw_rewards_from_custodial_wallets(sender_wallet, app_id, custodial_wal
         encoded_txns.append(txn_grp)
 
     return encoded_txns
-
-
-

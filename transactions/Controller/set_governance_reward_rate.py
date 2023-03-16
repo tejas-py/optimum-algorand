@@ -20,7 +20,7 @@ def reward_rate(admin_wallet, app_id):
     params = algod_client.suggested_params()
 
     reward_rate_number = 2
-    reward_rate_decimals = 10  # i.e apy = 2/10 = 0.2%
+    reward_rate_decimal = 10  # i.e apy = 2/10 = 0.2%
 
     # build the transaction
     atc = atomic_transaction_composer.AtomicTransactionComposer()
@@ -29,11 +29,12 @@ def reward_rate(admin_wallet, app_id):
         method=Optimum.set_governance_reward_rate,
         sender=admin_wallet,
         suggested_params=params,
-        method_args=[reward_rate_number, reward_rate_decimals]
+        reward_rate_number=reward_rate_number,
+        reward_rate_decimal=reward_rate_decimal
     )
 
     # extract the transaction from the ATC
-    txn_details = atc.txn_list[0]
-    result = [{'txn': encoding.msgpack_encode(txn_details.txn)}]
+    txn_details = atc.txn_list[0].txn
+    result = [{'txn': encoding.msgpack_encode(txn_details)}]
 
     return result

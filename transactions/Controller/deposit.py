@@ -44,8 +44,8 @@ def deposit(sender_wallet, app_id, asset_id, algo_amt):
     )
 
     # fetch the transaction objects
-    txn_1 = atc.txn_list[0]
-    txn_2 = atc.txn_list[1]
+    txn_1 = atc.txn_list[0].txn
+    txn_2 = atc.txn_list[1].txn
 
     # Group Transactions
     print("Grouping transactions...")
@@ -104,7 +104,7 @@ def fund_custodian_wallets(sender_wallet, app_id, deposit_amt):
             accounts=[txn_account_array[j]]
         )
         # push the txn object into the transaction array
-        txn_array.append(atc.txn_list[0])
+        txn_array.append(atc.txn_list[0].txn)
         j += 1
 
     # Assemble the transactions in group of 16, and pass return the transaction object

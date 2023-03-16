@@ -33,10 +33,10 @@ def get_random_value(app_id, wallet_address):
     )
 
     # extract the transaction from the ATC
-    txn_details = atc.txn_list[0]
-    result = [{'txn': encoding.msgpack_encode(txn_details.txn)}]
+    txn_details = atc.txn_list[0].txn
+    result = [{'txn': encoding.msgpack_encode(txn_details)}]
 
-    return result
+    return txn_details
 
 
 # Search the Account's local state OPT Balance in the Application
@@ -54,7 +54,7 @@ def local_opt_balance(app_id):
     local_opt_balances = {}
 
     # Check the account local state in the application
-    for account in all_accounts.accounts:
+    for account in all_accounts['accounts']:
         account_local_state = app_client.get_account_state(account)
         if account_local_state is None:
             continue
@@ -62,7 +62,7 @@ def local_opt_balance(app_id):
         # Local OPT Balance in User Account
         local_opt_amount = account_local_state.get('LOCAL_OPT_AMOUNT')
         if local_opt_amount and local_opt_amount > 0:
-            local_opt_balances[account.address] = local_opt_amount
+            local_opt_balances[account['address']] = local_opt_amount
 
     return local_opt_balances
 
@@ -77,7 +77,6 @@ def get_winner_and_reward_amt(app_id, vrf_random_number):
 
     # get the app global state
     app_global_state = app_client.get_application_state()
-    print("Application Global State:", app_global_state)
 
     reward_rate_number = app_global_state.get('GLOBAL_GOVERNANCE_REWARD_RATE_NUMBER')
     reward_rate_decimals = app_global_state.get('GLOBAL_GOVERNANCE_REWARD_RATE_DECIMALS')
@@ -127,10 +126,3 @@ def get_winner_and_reward_amt(app_id, vrf_random_number):
     addresses = list(app_local_opt_balance.keys())
     return [addresses[random_number-1], reward_per_week]
 
-#
-# if __name__ == "__main__":
-#     res = indexer_client.search_transactions(txid="M7I3UZNRECBHQPI7I5YR5EI6RK7K24GGEPTPH6V65HC2CHTQD7QQ")
-#     return_value = res['transactions'][0]['logs'][0]
-#     decoded_value = base64.b64decode(return_value)
-#     print(decoded_value[4:])
-#     print(int.from_bytes(decoded_value, 'big'))

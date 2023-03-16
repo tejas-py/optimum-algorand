@@ -29,8 +29,8 @@ def whitelist_account(wallet_address, app_id):
     )
 
     # Opt-in to the Optimum application first
-    optin_txn = app_client.opt_in()
-    print("Opt-in Transaction id:", optin_txn)
+    # optin_txn = app_client.opt_in()
+    # print("Opt-in Transaction id:", optin_txn)
 
     # set the params
     params = algod_client.suggested_params()
@@ -46,7 +46,7 @@ def whitelist_account(wallet_address, app_id):
     )
 
     # extract the transaction from the ATC
-    txn_details = atc.txn_list[0]
-    result = [{'txn': encoding.msgpack_encode(txn_details.txn)}]
+    txn_details = atc.txn_list[0].txn
+    result = [{'txn': encoding.msgpack_encode(txn_details)}]
 
     return result

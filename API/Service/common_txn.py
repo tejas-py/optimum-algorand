@@ -6,8 +6,8 @@ def app_optin(opt_app_id):
 
     try:
         # get the details from the payload as json object
-        deposit_payload = request.get_json()
-        sender_wallet = deposit_payload['sender_waller']
+        app_optin_payload = request.get_json()
+        sender_wallet = app_optin_payload['sender_wallet']
     except Exception as error:
         return jsonify({'message': f'Payload Error! Key Missing: {error}'}), 400
 
@@ -34,8 +34,8 @@ def asset_optin(opt_asset_id):
 
     try:
         # get the details from the payload as json object
-        deposit_payload = request.get_json()
-        sender_wallet = deposit_payload['sender_waller']
+        asa_optin_payload = request.get_json()
+        sender_wallet = asa_optin_payload['sender_wallet']
     except Exception as error:
         return jsonify({'message': f'Payload Error! Key Missing: {error}'}), 400
 

@@ -8,7 +8,7 @@ def deposit(opt_app_id, opt_asa_id):
     try:
         # get the details from the payload as json object
         deposit_payload = request.get_json()
-        sender_wallet = deposit_payload['sender_waller']
+        sender_wallet = deposit_payload['sender_wallet']
         algo_amt = int(deposit_payload['algo_amt'])
     except Exception as error:
         return jsonify({'message': f'Payload Error! Key Missing: {error}'}), 400
@@ -39,7 +39,7 @@ def fund_custodian_wallets(opt_app_id):
     try:
         # get the details from the payload as json object
         deposit_payload = request.get_json()
-        sender_wallet = deposit_payload['sender_waller']
+        sender_wallet = deposit_payload['sender_wallet']
         deposit_amt = int(deposit_payload['deposit_amt'])
     except Exception as error:
         return jsonify({'message': f'Payload Error! Key Missing: {error}'}), 400

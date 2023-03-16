@@ -3,6 +3,7 @@ import API
 from contract.application import Optimum
 from beaker import client
 from flask import jsonify
+import base64
 
 # Connect to Algod-Client and Indexer-Client in Testnet Network
 algod_client = API.connection.algo_conn("testnet")
@@ -20,12 +21,12 @@ def get_custodian_wallets(app_id, config):
 
     # search the indexer for the result
     res = indexer_client.accounts(
-        app_id=app_id,
+        application_id=app_id,
         auth_addr=logic.get_application_address(app_id)
     )
 
     custodian_wallets = []
-    for account in res.accounts:
+    for account in res['accounts']:
         local_state = app_client.get_account_state(account=account)
         if local_state == {}:
             continue
@@ -44,7 +45,7 @@ def get_custodian_wallets(app_id, config):
                 break
 
         if should_push is True:
-            custodian_wallets.append(account.address)
+            custodian_wallets.append(account['address'])
 
     return custodian_wallets
 
@@ -79,3 +80,13 @@ def check_balance(wallet_address, amt):
             return "False"
     except Exception as error:
         return jsonify({'message': f"Wallet not found! Error: {error}"}), 400
+
+
+# Search Indexer for the VRF return number
+def random_value_by_vrf(txn_id):
+    res = indexer_client.search_transactions(txn_id)
+    abi_return_value = res['transactions'][0]['logs'][0]
+    decoded_value = base64.b64decode(abi_return_value)[4:]
+    vrf_number = int.from_bytes(decoded_value, 'big')
+
+    return vrf_number

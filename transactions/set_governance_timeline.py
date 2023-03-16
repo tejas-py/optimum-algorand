@@ -43,8 +43,8 @@ def main(app_id, admin_wallet_address, asset_id):
     )
 
     # extract the transaction from the ATC
-    txn_details = atc.txn_list[0]
-    result = [{'txn': encoding.msgpack_encode(txn_details.txn)}]
+    txn_details = atc.txn_list[0].txn
+    result = [{'txn': encoding.msgpack_encode(txn_details)}]
 
     return result
 
