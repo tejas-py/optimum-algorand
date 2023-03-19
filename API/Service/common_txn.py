@@ -25,7 +25,7 @@ def app_optin(opt_app_id):
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500
     elif wallet_info == "False":
-        jsonify({'message': f"Wallet Balance Low, required amount: {1000}"}), 400
+        return jsonify({'message': f"Wallet Balance Low, required amount: {1000}"}), 400
     else:
         return wallet_info
 
@@ -53,6 +53,6 @@ def asset_optin(opt_asset_id):
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500
     elif wallet_info == "False":
-        jsonify({'message': f"Wallet Balance Low, required amount: {1000}"}), 400
+        return jsonify({'message': f"Wallet Balance Low, required amount: {1000}"}), 400
     else:
         return wallet_info

@@ -28,7 +28,7 @@ def deposit(opt_app_id, opt_asa_id):
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500
     elif wallet_info == "False":
-        jsonify({'message': f"Wallet Balance Low, required amount: {function_required_amount}"}), 400
+        return jsonify({'message': f"Wallet Balance Low, required amount: {function_required_amount}"}), 400
 
     else:
         return wallet_info
@@ -58,6 +58,6 @@ def fund_custodian_wallets(opt_app_id):
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500
     elif wallet_info == "False":
-        jsonify({'message': f"Wallet Balance Low, required amount: {1000}"}), 400
+        return jsonify({'message': f"Wallet Balance Low, required amount: {1000}"}), 400
     else:
         return wallet_info

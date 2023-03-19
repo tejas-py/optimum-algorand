@@ -26,7 +26,7 @@ def whitelist_account(opt_app_id):
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500
     elif wallet_info == "False":
-        jsonify({'message': f"Wallet Balance Low, required amount: {function_transaction_fees}"}), 400
+        return jsonify({'message': f"Wallet Balance Low, required amount: {function_transaction_fees}"}), 400
 
     else:
         return wallet_info
