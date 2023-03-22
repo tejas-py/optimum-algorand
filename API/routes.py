@@ -36,7 +36,7 @@ def page_not_found(e):
     return f"<title>Page Not Found</title><h1>404 Not Found</h1><p>{e}</p>", 404
 
 
-@app.post('/select-node')
+@app.post('/blockchain/select-node')
 def select_node():
 
     # define the global params
@@ -72,7 +72,7 @@ def select_node():
         return jsonify({'message': "Please Select the correct node"}), 400
 
 
-@app.get('/get-node')
+@app.get('/blockchain/get-node')
 def get_node():
 
     # check if both the clients are running
