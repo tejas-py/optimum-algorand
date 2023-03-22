@@ -1,15 +1,12 @@
 from algosdk import encoding, atomic_transaction_composer
-import API
 from contract.application import Optimum
 from beaker import client
 
-# Connect to Algod-Client in Testnet Network
-algod_client = API.connection.algo_conn("testnet")
 # Create a Dummy Signer to fetch the transaction object
 ACCOUNT_SIGNER = atomic_transaction_composer.AccountTransactionSigner("a" * 32)
 
 
-def reward_rate(admin_wallet, app_id):
+def reward_rate(algod_client, admin_wallet, app_id):
 
     # Create  an app client for our app
     app_client = client.ApplicationClient(

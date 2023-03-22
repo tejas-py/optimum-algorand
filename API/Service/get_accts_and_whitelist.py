@@ -3,7 +3,7 @@ import utils
 import transactions
 
 
-def whitelist_account(opt_app_id):
+def whitelist_account(algod_client, opt_app_id):
 
     try:
         # get the details from the payload as json object
@@ -16,12 +16,12 @@ def whitelist_account(opt_app_id):
     function_transaction_fees = 1000  # one Transaction of fees 1000
 
     # Wallet Information
-    wallet_info = utils.common_functions.check_balance(sender_wallet, function_transaction_fees)
+    wallet_info = utils.common_functions.check_balance(algod_client, sender_wallet, function_transaction_fees)
 
     # check if the wallet contains balance to execute the transaction
     if wallet_info == "True":
         try:
-            txn_object = transactions.Controller.get_accts_and_whitelist.whitelist_account(sender_wallet, opt_app_id)
+            txn_object = transactions.Controller.get_accts_and_whitelist.whitelist_account(algod_client, sender_wallet, opt_app_id)
             return jsonify(txn_object), 200
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500

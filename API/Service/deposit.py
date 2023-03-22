@@ -3,7 +3,7 @@ import utils
 import transactions
 
 
-def deposit(opt_app_id, opt_asa_id):
+def deposit(algod_client, opt_app_id, opt_asa_id):
 
     try:
         # get the details from the payload as json object
@@ -18,12 +18,12 @@ def deposit(opt_app_id, opt_asa_id):
     function_required_amount = algo_amt + function_transaction_fees
 
     # Wallet Information
-    wallet_info = utils.common_functions.check_balance(sender_wallet, function_transaction_fees)
+    wallet_info = utils.common_functions.check_balance(algod_client, sender_wallet, function_transaction_fees)
 
     # check if the wallet contains balance to execute the transaction
     if wallet_info == "True":
         try:
-            txn_object = transactions.Controller.deposit.deposit(sender_wallet, opt_app_id, opt_asa_id, algo_amt)
+            txn_object = transactions.Controller.deposit.deposit(algod_client, sender_wallet, opt_app_id, opt_asa_id, algo_amt)
             return jsonify(txn_object), 200
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500
@@ -34,7 +34,7 @@ def deposit(opt_app_id, opt_asa_id):
         return wallet_info
 
 
-def fund_custodian_wallets(opt_app_id):
+def fund_custodian_wallets(algod_client, indexer_client, opt_app_id):
 
     try:
         # get the details from the payload as json object
@@ -48,12 +48,12 @@ def fund_custodian_wallets(opt_app_id):
     function_transaction_fees = 1000  # Unknown number of transaction will be executed, so will take 1000
 
     # Wallet Information
-    wallet_info = utils.common_functions.check_balance(sender_wallet, function_transaction_fees)
+    wallet_info = utils.common_functions.check_balance(algod_client, sender_wallet, function_transaction_fees)
 
     # check if the wallet contains balance to execute the transaction
     if wallet_info == "True":
         try:
-            txn_object = transactions.Controller.deposit.fund_custodian_wallets(sender_wallet, opt_app_id, deposit_amt)
+            txn_object = transactions.Controller.deposit.fund_custodian_wallets(algod_client, indexer_client, sender_wallet, opt_app_id, deposit_amt)
             return jsonify(txn_object), 200
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500

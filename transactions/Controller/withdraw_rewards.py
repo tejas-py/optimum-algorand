@@ -1,12 +1,8 @@
 from algosdk import encoding, atomic_transaction_composer, transaction, logic
-import API
 from contract.application import Optimum
 from beaker import client
 import utils
 
-# Connect to Algod-Client and Indexer-Client in Testnet Network
-algod_client = API.connection.algo_conn("testnet")
-indexer_client = API.connection.connect_indexer('testnet')
 # Create a Dummy Signer to fetch the transaction object
 ACCOUNT_SIGNER = atomic_transaction_composer.AccountTransactionSigner("a" * 32)
 
@@ -16,7 +12,7 @@ ACCOUNT_SIGNER = atomic_transaction_composer.AccountTransactionSigner("a" * 32)
 # + Each account must be whitelisted and rekeyed to the optimum app.
 # + Each account must be registered and has voted to governance.
 # + We use the indexer to query all accounts opted in & rekeyed to app
-def get_custodial_wallets_with_extra_bal(app_id):
+def get_custodial_wallets_with_extra_bal(algod_client, indexer_client, app_id):
 
     # Create  an app client for our app
     app_client = client.ApplicationClient(
@@ -53,7 +49,7 @@ def get_custodial_wallets_with_extra_bal(app_id):
 # Find and withdraw from each custodial wallet(s) 10000 ALGO's. Returns if enough wallets
 # are not available to withdraw from (which shouldn't happen).
 # NOTE: withdraw amount is in microAlgos
-def withdraw_rewards_from_custodial_wallets(sender_wallet, app_id, custodial_wallets, amts_to_withdraw):
+def withdraw_rewards_from_custodial_wallets(algod_client, sender_wallet, app_id, custodial_wallets, amts_to_withdraw):
 
     # Create  an app client for our app
     app_client = client.ApplicationClient(

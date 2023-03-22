@@ -1,19 +1,15 @@
 from algosdk import atomic_transaction_composer, logic
-import API
 from contract.application import Optimum
 from beaker import client
 from flask import jsonify
 import base64
 
-# Connect to Algod-Client and Indexer-Client in Testnet Network
-algod_client = API.connection.algo_conn("testnet")
-indexer_client = API.connection.connect_indexer("testnet")
 # Create a Dummy Signer to fetch the transaction object
 ACCOUNT_SIGNER = atomic_transaction_composer.AccountTransactionSigner("a" * 32)
 
 
 # fetch the custodian wallets
-def get_custodian_wallets(app_id, config):
+def get_custodian_wallets(algod_client, indexer_client, app_id, config):
     # Create  an app client for our app
     app_client = client.ApplicationClient(
         client=algod_client, app=Optimum(), app_id=app_id, signer=ACCOUNT_SIGNER
@@ -66,7 +62,7 @@ def chunky_array(my_array, chunk_size):
 
 
 # check the balance with the amount, if the wallet does not have minimum amount, the function will return false.
-def check_balance(wallet_address, amt):
+def check_balance(algod_client, wallet_address, amt):
 
     try:
         account_i = algod_client.account_info(wallet_address)
@@ -83,10 +79,11 @@ def check_balance(wallet_address, amt):
 
 
 # Search Indexer for the VRF return number
-def random_value_by_vrf(txn_id):
+def random_value_by_vrf(indexer_client, txn_id):
     res = indexer_client.search_transactions(txn_id)
     abi_return_value = res['transactions'][0]['logs'][0]
     decoded_value = base64.b64decode(abi_return_value)[4:]
     vrf_number = int.from_bytes(decoded_value, 'big')
 
     return vrf_number
+

@@ -3,7 +3,7 @@ import utils
 import transactions
 
 
-def withdraw(opt_app_id, opt_asa_id):
+def withdraw(algod_client, opt_app_id, opt_asa_id):
     try:
         # get the details from the payload as json object
         withdraw_payload = request.get_json()
@@ -17,12 +17,12 @@ def withdraw(opt_app_id, opt_asa_id):
     function_transaction_fees = 1000 + 3000  # two Transaction of fees 1000, and 3000
 
     # Wallet Information
-    wallet_info = utils.common_functions.check_balance(sender_wallet, function_transaction_fees)
+    wallet_info = utils.common_functions.check_balance(algod_client, sender_wallet, function_transaction_fees)
 
     # check if the wallet contains balance to execute the transaction
     if wallet_info == "True":
         try:
-            txn_object = transactions.Controller.withdraw.withdraw(sender_wallet, fee_address,
+            txn_object = transactions.Controller.withdraw.withdraw(algod_client, sender_wallet, fee_address,
                                                                    opt_app_id, opt_asa_id, opt_amt)
             return jsonify(txn_object), 200
         except Exception as error:
@@ -34,16 +34,16 @@ def withdraw(opt_app_id, opt_asa_id):
         return wallet_info
 
 
-def compute_algo_withdraw_amt_from_opt(opt_app_id, opt_asa_id, opt_amt):
+def compute_algo_withdraw_amt_from_opt(algod_client, indexer_client, opt_app_id, opt_asa_id, opt_amt):
     try:
-        return_value = transactions.Controller.withdraw.compute_algo_withdraw_amt_from_opt(opt_app_id, opt_asa_id,
+        return_value = transactions.Controller.withdraw.compute_algo_withdraw_amt_from_opt(algod_client, indexer_client, opt_app_id, opt_asa_id,
                                                                                            opt_amt)
         return jsonify(return_value), 200
     except Exception as error:
         return jsonify({'message': f"Server Error! {error}"}), 500
 
 
-def withdraw_from_custodial_wallets(opt_app_id):
+def withdraw_from_custodial_wallets(algod_client, indexer_client, opt_app_id):
     try:
         # get the details from the payload as json object
         withdraw_payload = request.get_json()
@@ -56,12 +56,12 @@ def withdraw_from_custodial_wallets(opt_app_id):
     function_transaction_fees = 1000  # Unknown number of transaction will be executed, so will take 1000
 
     # Wallet Information
-    wallet_info = utils.common_functions.check_balance(sender_wallet, function_transaction_fees)
+    wallet_info = utils.common_functions.check_balance(algod_client, sender_wallet, function_transaction_fees)
 
     # check if the wallet contains balance to execute the transaction
     if wallet_info == "True":
         try:
-            txn_object = transactions.Controller.withdraw.withdraw_from_custodial_wallets(sender_wallet, opt_app_id,
+            txn_object = transactions.Controller.withdraw.withdraw_from_custodial_wallets(algod_client, indexer_client, sender_wallet, opt_app_id,
                                                                                           withdraw_amt)
             return jsonify(txn_object), 200
         except Exception as error:

@@ -3,7 +3,7 @@ import utils
 import transactions
 
 
-def reward_rate(opt_app_id):
+def reward_rate(algod_client, opt_app_id):
 
     try:
         # get the details from the payload as json object
@@ -16,12 +16,12 @@ def reward_rate(opt_app_id):
     function_transaction_fees = 1000  # One Transaction of fees 1000
 
     # Wallet Information
-    wallet_info = utils.common_functions.check_balance(admin_wallet, function_transaction_fees)
+    wallet_info = utils.common_functions.check_balance(algod_client, admin_wallet, function_transaction_fees)
 
     # check if the wallet contains balance to execute the transaction
     if wallet_info == "True":
         try:
-            txn_object = transactions.Controller.set_governance_reward_rate.reward_rate(admin_wallet, opt_app_id)
+            txn_object = transactions.Controller.set_governance_reward_rate.reward_rate(algod_client, admin_wallet, opt_app_id)
             return jsonify(txn_object), 200
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500

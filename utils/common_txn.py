@@ -1,17 +1,13 @@
 from algosdk import encoding, atomic_transaction_composer, transaction
-import API
 from contract.application import Optimum
 from beaker import client
 
-# Connect to Algod-Client in Testnet Network
-algod_client = API.connection.algo_conn("testnet")
-indexer_client = API.connection.connect_indexer("testnet")
 # Create a Dummy Signer to fetch the transaction object
 ACCOUNT_SIGNER = atomic_transaction_composer.AccountTransactionSigner("a" * 32)
 
 
 # Optimum App optin by the wallet
-def app_opt_in(sender_wallet, app_id):
+def app_opt_in(algod_client, sender_wallet, app_id):
 
     # Create  an app client for our app
     app_client = client.ApplicationClient(
@@ -41,7 +37,7 @@ def app_opt_in(sender_wallet, app_id):
 
 
 # Optimum ASA optin by the wallet
-def asset_opt_in(sender_wallet, asset_id):
+def asset_opt_in(algod_client, sender_wallet, asset_id):
 
     # transaction params
     params_optin = algod_client.suggested_params()

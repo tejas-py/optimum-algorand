@@ -22,7 +22,8 @@ def algo_conn(network):
         algod_token = "ksZOvoviIZ163QVUoTht86g0qMBmLJIS9hcFpcNl"
         headers = {"X-API-Key": algod_token}
         conn = algod.AlgodClient(algod_token, algod_address, headers)
-        return conn
+
+        return conn.algod_address
 
 
 # Connection to Algorand Indexer

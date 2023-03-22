@@ -2,7 +2,7 @@ from flask import request, jsonify
 import utils
 
 
-def app_optin(opt_app_id):
+def app_optin(algod_client, opt_app_id):
 
     try:
         # get the details from the payload as json object
@@ -15,12 +15,12 @@ def app_optin(opt_app_id):
     function_transaction_fees = 1000  # One transaction of fees 1000
 
     # Wallet Information
-    wallet_info = utils.common_functions.check_balance(sender_wallet, function_transaction_fees)
+    wallet_info = utils.common_functions.check_balance(algod_client, sender_wallet, function_transaction_fees)
 
     # check if the wallet contains balance to execute the transaction
     if wallet_info == "True":
         try:
-            txn_object = utils.common_txn.app_opt_in(sender_wallet, opt_app_id)
+            txn_object = utils.common_txn.app_opt_in(algod_client, sender_wallet, opt_app_id)
             return jsonify(txn_object), 200
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500
@@ -30,7 +30,7 @@ def app_optin(opt_app_id):
         return wallet_info
 
 
-def asset_optin(opt_asset_id):
+def asset_optin(algod_client, opt_asset_id):
 
     try:
         # get the details from the payload as json object
@@ -43,12 +43,12 @@ def asset_optin(opt_asset_id):
     function_transaction_fees = 1000  # One transaction of fees 1000
 
     # Wallet Information
-    wallet_info = utils.common_functions.check_balance(sender_wallet, function_transaction_fees)
+    wallet_info = utils.common_functions.check_balance(algod_client, sender_wallet, function_transaction_fees)
 
     # check if the wallet contains balance to execute the transaction
     if wallet_info == "True":
         try:
-            txn_object = utils.common_txn.asset_opt_in(sender_wallet, opt_asset_id)
+            txn_object = utils.common_txn.asset_opt_in(algod_client, sender_wallet, opt_asset_id)
             return jsonify(txn_object), 200
         except Exception as error:
             return jsonify({'message': f"Server Error! {error}"}), 500

@@ -1,16 +1,13 @@
 from algosdk import encoding, atomic_transaction_composer, transaction, logic
-import API
 from contract.application import Optimum
 from beaker import client
 import utils
 
-# Connect to Algod-Client in Testnet Network
-algod_client = API.connection.algo_conn("testnet")
 # Create a Dummy Signer to fetch the transaction object
 ACCOUNT_SIGNER = atomic_transaction_composer.AccountTransactionSigner("a" * 32)
 
 
-def deposit(sender_wallet, app_id, asset_id, algo_amt):
+def deposit(algod_client, sender_wallet, app_id, asset_id, algo_amt):
 
     # Create  an app client for our app
     app_client = client.ApplicationClient(
@@ -63,7 +60,7 @@ def deposit(sender_wallet, app_id, asset_id, algo_amt):
 # Find and fund custodial wallets with 10000 ALGO increments.
 # Returns if enough wallets are not available.
 # NOTE: deposit amount is in microAlgos
-def fund_custodian_wallets(sender_wallet, app_id, deposit_amt):
+def fund_custodian_wallets(algod_client, indexer_client, sender_wallet, app_id, deposit_amt):
 
     # Create  an app client for our app
     app_client = client.ApplicationClient(
@@ -71,7 +68,7 @@ def fund_custodian_wallets(sender_wallet, app_id, deposit_amt):
     )
 
     # extract custodial wallets from indexer, which we will fund
-    custodial_wallets_orig = utils.common_functions.get_custodian_wallets(app_id, {'deposited': 0})
+    custodial_wallets_orig = utils.common_functions.get_custodian_wallets(algod_client, indexer_client, app_id, {'deposited': 0})
 
     req_wallets = int(deposit_amt/10000e6)
     if len(custodial_wallets_orig) < req_wallets:

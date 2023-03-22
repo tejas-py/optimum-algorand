@@ -1,17 +1,14 @@
 from algosdk import encoding, atomic_transaction_composer, transaction
-import API
 from contract.application import Optimum
 from beaker import client
 import utils
 
-# Connect to Algod-Client and Indexer-Client in Testnet Network
-algod_client = API.connection.algo_conn("testnet")
 # Create a Dummy Signer to fetch the transaction object
 ACCOUNT_SIGNER = atomic_transaction_composer.AccountTransactionSigner("a" * 32)
 
 
 # Find and vote by each custodial wallets (which haven't voted before) for algorand governance.
-def vote_by_custodial_wallet(sender_wallet, app_id, governance_address, memo):
+def vote_by_custodial_wallet(algod_client, indexer_client, sender_wallet, app_id, governance_address, memo):
 
     # Create  an app client for our app
     app_client = client.ApplicationClient(
@@ -19,7 +16,7 @@ def vote_by_custodial_wallet(sender_wallet, app_id, governance_address, memo):
     )
 
     # extract custodial wallets from indexer, which we will fund
-    custodial_wallets = utils.common_functions.get_custodian_wallets(app_id, {"registered": 1, "voted": 0})
+    custodial_wallets = utils.common_functions.get_custodian_wallets(algod_client, indexer_client, app_id, {"registered": 1, "voted": 0})
 
     # split whole custodial wallets array into chunks of 3
     # as max 4 accounts can be passed in a tx group, and

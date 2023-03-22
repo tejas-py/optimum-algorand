@@ -3,16 +3,16 @@ import utils
 import transactions
 
 
-def get_custodial_wallets_with_extra_bal(opt_app_id):
+def get_custodial_wallets_with_extra_bal(algod_client, indexer_client, opt_app_id):
 
     try:
-        return_value = transactions.Controller.withdraw_rewards.get_custodial_wallets_with_extra_bal(opt_app_id)
+        return_value = transactions.Controller.withdraw_rewards.get_custodial_wallets_with_extra_bal(algod_client, indexer_client, opt_app_id)
         return jsonify(return_value), 200
     except Exception as error:
         return jsonify({'message': f"Server Error! {error}"}), 500
 
 
-def withdraw_rewards_from_custodial_wallets(opt_app_id):
+def withdraw_rewards_from_custodial_wallets(algod_client, opt_app_id):
 
     try:
         # get the details from the payload as json object
@@ -27,12 +27,13 @@ def withdraw_rewards_from_custodial_wallets(opt_app_id):
     function_transaction_fees = 1000  # Unknown number of transaction will be executed, so will take 1000
 
     # Wallet Information
-    wallet_info = utils.common_functions.check_balance(sender_wallet, function_transaction_fees)
+    wallet_info = utils.common_functions.check_balance(algod_client, sender_wallet, function_transaction_fees)
 
     # check if the wallet contains balance to execute the transaction
     if wallet_info == "True":
         try:
             txn_object = transactions.Controller.withdraw_rewards.withdraw_rewards_from_custodial_wallets(
+                algod_client,
                 sender_wallet,
                 opt_app_id,
                 custodial_wallets,

@@ -1,26 +1,39 @@
-from algosdk import encoding, atomic_transaction_composer
-import API
+from algosdk import encoding, atomic_transaction_composer, transaction
+import utils.common_functions
 from contract.application import Optimum
 from beaker import client
 
-# Connect to Algod-Client in Testnet Network
-algod_client = API.connection.algo_conn("testnet")
-indexer_client = API.connection.connect_indexer("testnet")
+
 # Create a Dummy Signer to fetch the transaction object
 ACCOUNT_SIGNER = atomic_transaction_composer.AccountTransactionSigner("a" * 32)
 
+# vrf application id for mainnet and testnet
+vrf_app_id = {'testnet': 110096026, 'mainnet': 947957720}
+
 
 # Get the Random value by calling the VRF Function in the Smart Contract
-def get_random_value(app_id, wallet_address):
+def get_random_value(algod_client, app_id, wallet_address):
 
     # Create  an app client for our app
     app_client = client.ApplicationClient(
         client=algod_client, app=Optimum(), app_id=app_id, signer=ACCOUNT_SIGNER
     )
 
+    # get the params for the transaction
     params = algod_client.suggested_params()
     params.fee = 2000
     params.flat_fee = True
+
+    # get the network address
+    network_address = algod_client.algod_address
+
+    # get the current node
+    if network_address == "https://testnet-algorand.api.purestake.io/ps2":
+        node_network = "testnet"
+    elif network_address == "https://mainnet-algorand.api.purestake.io/ps2":
+        node_network = "mainnet"
+    else:
+        node_network = ""
 
     # build the transaction
     atc = atomic_transaction_composer.AtomicTransactionComposer()
@@ -29,18 +42,18 @@ def get_random_value(app_id, wallet_address):
         method=Optimum.VRF,
         sender=wallet_address,
         suggested_params=params,
-        foreign_apps=[110096026]
+        foreign_apps=vrf_app_id[node_network]
     )
 
     # extract the transaction from the ATC
     txn_details = atc.txn_list[0].txn
     result = [{'txn': encoding.msgpack_encode(txn_details)}]
 
-    return txn_details
+    return result
 
 
 # Search the Account's local state OPT Balance in the Application
-def local_opt_balance(app_id):
+def local_opt_balance(algod_client, indexer_client, app_id):
 
     # Create  an app client for our app
     app_client = client.ApplicationClient(
@@ -54,7 +67,7 @@ def local_opt_balance(app_id):
     local_opt_balances = {}
 
     # Check the account local state in the application
-    for account in all_accounts['accounts']:
+    for account in all_accounts['accounts'][0]:
         account_local_state = app_client.get_account_state(account)
         if account_local_state is None:
             continue
@@ -68,7 +81,7 @@ def local_opt_balance(app_id):
 
 
 # get the winner and reward amount
-def get_winner_and_reward_amt(app_id, vrf_random_number):
+def get_winner_and_reward_amt(algod_client, indexer_client, app_id, vrf_random_number):
 
     # Create  an app client for our app
     app_client = client.ApplicationClient(
@@ -87,7 +100,7 @@ def get_winner_and_reward_amt(app_id, vrf_random_number):
         apy = (reward_rate_number * 1.0)/reward_rate_decimals
 
     # get the account's local state opt balance
-    app_local_opt_balance = local_opt_balance(app_id)
+    app_local_opt_balance = local_opt_balance(algod_client, indexer_client, app_id)
 
     # Get the total OPT ASA Amount in the Smart Contract local State
     total_opt = 0.0
@@ -126,3 +139,39 @@ def get_winner_and_reward_amt(app_id, vrf_random_number):
     addresses = list(app_local_opt_balance.keys())
     return [addresses[random_number-1], reward_per_week]
 
+
+# Get the vrf number from the transaction id
+def reveal_vrf_number(indexer_client, vrf_txn_id):
+
+    # get the vrf number from the transaction id
+    vrf_number = utils.common_functions.random_value_by_vrf(indexer_client, vrf_txn_id)
+
+    return {'message': vrf_number}
+
+
+# transfer 0 amount to admin and pass the vrf number as the transaction note
+def send_vrf_number_to_admin(algod_client, admin_wallet, vrf_number):
+
+    # set the params
+    atc = atomic_transaction_composer.AtomicTransactionComposer()
+    params = algod_client.suggested_params()
+
+    # make transaction object
+    atc.add_transaction(atomic_transaction_composer.TransactionWithSigner(
+        txn=transaction.PaymentTxn(
+            admin_wallet,
+            params,
+            admin_wallet,
+            0,
+            note=vrf_number
+        ),
+        signer=ACCOUNT_SIGNER
+    ))
+
+    # get the txn object
+    txn_object = atc.txn_list[0].txn
+
+    # encode the transaction
+    result = [{'txn': encoding.msgpack_encode(txn_object)}]
+
+    return result

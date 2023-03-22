@@ -1,20 +1,16 @@
 from algosdk import encoding, atomic_transaction_composer, transaction, logic
-import API
 from contract.application import Optimum
 from beaker import client
 import utils
 
 
-# Connect to Algod-Client and Indexer-Client in Testnet Network
-algod_client = API.connection.algo_conn("testnet")
-indexer_client = API.connection.connect_indexer('testnet')
 # Create a Dummy Signer to fetch the transaction object
 ACCOUNT_SIGNER = atomic_transaction_composer.AccountTransactionSigner("a" * 32)
 
 TEN_BILLION = 10000000000000000
 
 
-def withdraw(sender_wallet, fee_address, app_id, asset_id, opt_amt):
+def withdraw(algod_client, sender_wallet, fee_address, app_id, asset_id, opt_amt):
 
     # Create  an app client for our app
     app_client = client.ApplicationClient(
@@ -73,7 +69,7 @@ def withdraw(sender_wallet, fee_address, app_id, asset_id, opt_amt):
 
 # Computes ALGO amount to withdraw from the custodial wallets, depending on the OPT we
 # will submit, using the current exchange rate.
-def compute_algo_withdraw_amt_from_opt(app_id, asset_id, opt_amt):
+def compute_algo_withdraw_amt_from_opt(algod_client, indexer_client, app_id, asset_id, opt_amt):
 
     # Create  an app client for our app
     app_client = client.ApplicationClient(
@@ -106,7 +102,7 @@ def compute_algo_withdraw_amt_from_opt(app_id, asset_id, opt_amt):
 # Find and withdraw from each custodial wallet(s) 10000 ALGO's. Returns if enough wallets
 # are not available to withdraw from (which shouldn't happen).
 # NOTE: withdraw amount is in microAlgos
-def withdraw_from_custodial_wallets(sender_wallet, app_id, withdraw_amt):
+def withdraw_from_custodial_wallets(algod_client, indexer_client, sender_wallet, app_id, withdraw_amt):
 
     # Create  an app client for our app
     app_client = client.ApplicationClient(
@@ -114,7 +110,7 @@ def withdraw_from_custodial_wallets(sender_wallet, app_id, withdraw_amt):
     )
 
     # extract custodial wallets from indexer, from which we will withdraw 10000 ALGO's
-    custodial_wallet_orig = utils.common_functions.get_custodian_wallets(app_id, {'deposited': 10000})
+    custodial_wallet_orig = utils.common_functions.get_custodian_wallets(algod_client, indexer_client, app_id, {'deposited': 10000})
 
     req_wallets = int(withdraw_amt/10000e6)
 
