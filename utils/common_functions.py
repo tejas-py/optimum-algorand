@@ -86,4 +86,3 @@ def random_value_by_vrf(indexer_client, txn_id):
     vrf_number = int.from_bytes(decoded_value, 'big')
 
     return vrf_number
-
