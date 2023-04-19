@@ -1,4 +1,4 @@
-from API.routes import *
+from routes import *
 
 # running the API
 if __name__ == "__main__":
